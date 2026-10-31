@@ -67,6 +67,13 @@ Update `SQLALCHEMY_DATABASE_URI` depending on your database:
 - PostgreSQL: `postgresql+psycopg2://<user>:<password>@<host>:5432/whoop_data`
 - MySQL: `mysql+pymysql://<user>:<password>@<host>:3306/whoop_data`
 
+# Kubernetes (Helm)
+
+For Kubernetes deployments, use the Helm chart in the
+[rpi-k3s](https://github.com/szpaczyna/rpi-k3s) repository:
+`cluster/helm/whoops`. The manifests under `templates/` in this repository are
+legacy and may drift from the chart.
+
 # Usage
 
 1. Navigate to [http://localhost:5000/authorize](http://localhost:5000/authorize) to authorize Whoops to access your Whoop data.
