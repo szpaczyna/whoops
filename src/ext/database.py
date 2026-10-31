@@ -53,8 +53,42 @@ def add_all(models):
             raise
 
 
+def _migrate_schema():
+    """Best-effort, idempotent migration for columns added after 1.1.1.
+
+    ``db.create_all()`` does not alter existing tables, so users upgrading from
+    an older release need these columns added manually otherwise. Running the
+    statements here (and ignoring "already exists"/"does not exist" errors)
+    keeps upgrades working without a separate migration tool.
+    """
+    statements_pg = [
+        'ALTER TABLE whoop_cycle ADD COLUMN IF NOT EXISTS user_id BIGINT',
+        'ALTER TABLE whoop_cycle ADD COLUMN IF NOT EXISTS step_count INTEGER',
+        'ALTER TABLE whoop_cycle ALTER COLUMN "end" DROP NOT NULL',
+        'ALTER TABLE whoop_sleep ADD COLUMN IF NOT EXISTS user_id BIGINT',
+    ]
+    statements_mysql = [
+        'ALTER TABLE whoop_cycle ADD COLUMN user_id BIGINT NULL',
+        'ALTER TABLE whoop_cycle ADD COLUMN step_count INT NULL',
+        'ALTER TABLE whoop_cycle MODIFY `end` DATETIME NULL',
+        'ALTER TABLE whoop_sleep ADD COLUMN user_id BIGINT NULL',
+    ]
+
+    dialect = db.engine.dialect.name
+    statements = statements_pg if dialect == "postgresql" else statements_mysql
+
+    for stmt in statements:
+        try:
+            db.session.execute(db.text(stmt))
+            db.session.commit()
+        except Exception as exc:  # noqa: BLE001 - best effort
+            db.session.rollback()
+            logger.debug("Migration statement skipped: %s (%s)", stmt, exc)
+
+
 def init_app(app):
     """Initializes the database extension."""
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        _migrate_schema()

@@ -14,4 +14,5 @@ RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels \
     && pip uninstall -y pip
 COPY . .
 ENV PYTHONPATH=/app/src
+ENV TZ=UTC
 CMD ["python", "-m", "src.main"]

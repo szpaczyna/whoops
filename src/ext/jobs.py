@@ -106,7 +106,7 @@ def _import_worker(app):
 
 
 def init_app(app):
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(timezone="UTC")
 
     scheduler.add_job(
         refresh_token_job,
