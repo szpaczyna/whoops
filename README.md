@@ -18,6 +18,12 @@ Whoops is a simple Flask application that imports your Whoop data into a Postgre
 > [!NOTE]
 > The redirect URL configured for your Whoop app must match the URL where Whoops will run (e.g., `http://localhost:5000/callback`).
 
+> [!NOTE]
+> `SECRET_KEY` is required and must be provided via the environment. Generate one with:
+> ```bash
+> python -c 'import secrets; print(secrets.token_hex(32))'
+> ```
+
 # Getting Started
 
 Example Docker compose file and kubernetes manifests are provided in the [templates](https://github.com/kryoseu/whoops/tree/main/templates) section, which also include how to install a database along with Whoops, in case you don't have one yet.
@@ -38,6 +44,7 @@ services:
       CLIENT_SECRET: "<your-whoop-client-secret-here"
       REDIRECT_URI: "http://localhost:5000/callback"
       SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data"
+      SECRET_KEY: "<a-long-random-string>"
     restart: unless-stopped
 ```
 
@@ -51,6 +58,7 @@ docker run -d \
   -e CLIENT_SECRET="<your-whoop-client-secret>" \
   -e REDIRECT_URI="http://localhost:5000/callback" \
   -e SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data" \
+  -e SECRET_KEY="<a-long-random-string>" \
   docker.io/kryoseu/whoops:latest
 ```
 
