@@ -41,6 +41,10 @@ def create_app():
     app.config["REDIRECT_URI"] = os.getenv("REDIRECT_URI")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
+    # Ensure all models are registered before create_all() runs inside
+    # load_extensions() (otherwise new tables like whoop_token are missing).
+    from src.models import token as _token  # noqa: F401
+
     app.config.load_extensions()  # type: ignore
 
     # SECRET_KEY is required and must come from the environment, never from
