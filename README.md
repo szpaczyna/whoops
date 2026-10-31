@@ -34,7 +34,7 @@ Using Docker compose:
 ```yaml
 services:
   whoops:
-    image: docker.io/kryoseu/whoops:latest
+    image: docker.io/szpaczyn/whoops:latest
     container_name: whoops
     ports:
       - "5000:5000"
@@ -58,7 +58,7 @@ docker run -d \
   -e REDIRECT_URI="http://localhost:5000/callback" \
   -e SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data" \
   -e SECRET_KEY="<a-long-random-string>" \
-  docker.io/kryoseu/whoops:latest
+  docker.io/szpaczyn/whoops:latest
 ```
 
 Update `SQLALCHEMY_DATABASE_URI` depending on your database:
@@ -99,11 +99,6 @@ If you have [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/inst
 
 <img width="1249" height="1222" alt="260317_11h15m30s_screenshot" src="https://github.com/user-attachments/assets/b726578d-9b30-472b-a51f-249d2ddb84cc" />
 
-## Support This Project ☕️
-
-If you like **Whoops** and want to help keep it improving, you can support me via:
-
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Ko--fi-red?style=flat-square)](https://ko-fi.com/kryoseu)
 
 Thank you for your support! 💛
 
