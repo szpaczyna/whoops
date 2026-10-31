@@ -70,7 +70,4 @@ jobs:
         run: |
           TAG="${{ needs.create-release-pr.outputs.tag_name }}"
           IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/whoops:${{ steps.ver.outputs.VERSION }}"
-          gh release edit "$TAG" --append-notes "## Docker image
-
-\`docker pull ${IMAGE}\`
-\`docker pull ${{ secrets.DOCKERHUB_USERNAME }}/whoops:latest\`" || true
+          gh release edit "$TAG" --append-notes "## Docker image: ${IMAGE}" || true
