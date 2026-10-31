@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.2](https://github.com/szpaczyna/whoops/compare/v1.2.1...v1.2.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* simplify release edit note in release workflow ([3b7de61](https://github.com/szpaczyna/whoops/commit/3b7de61c4b15c1796747c5b9d3337f766023e157))
+
+
+### CI/CD
+
+* build versioned image in release workflow ([2f53449](https://github.com/szpaczyna/whoops/commit/2f53449060761ca09a6270313f2464282b6b8f6c))
+* update actions, build-only on main, add linting ([#7](https://github.com/szpaczyna/whoops/issues/7)) ([0972574](https://github.com/szpaczyna/whoops/commit/0972574fa4c324ea0e96c5f34e5b2430691626d6))
+
 ## [1.2.1](https://github.com/szpaczyna/whoops/compare/v1.2.0...v1.2.1) (2026-10-31)
 
 
