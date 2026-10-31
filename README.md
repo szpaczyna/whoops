@@ -1,4 +1,4 @@
-[![Python](https://img.shields.io/badge/python-3.13-blue?style=flat-square)](https://www.python.org/downloads/release/python-3130/)
+[![Python](https://img.shields.io/badge/python-3.15-blue?style=flat-square)](https://www.python.org/downloads/release/python-3150/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Ko--fi-red?style=flat-square)](https://ko-fi.com/kryoseu)
 # Whoops
@@ -17,6 +17,12 @@ Whoops is a simple Flask application that imports your Whoop data into a Postgre
 
 > [!NOTE]
 > The redirect URL configured for your Whoop app must match the URL where Whoops will run (e.g., `http://localhost:5000/callback`).
+
+> [!NOTE]
+> `SECRET_KEY` is required and must be provided via the environment. Generate one with:
+> ```bash
+> python -c 'import secrets; print(secrets.token_hex(32))'
+> ```
 
 # Getting Started
 
@@ -38,6 +44,7 @@ services:
       CLIENT_SECRET: "<your-whoop-client-secret-here"
       REDIRECT_URI: "http://localhost:5000/callback"
       SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data"
+      SECRET_KEY: "<a-long-random-string>"
     restart: unless-stopped
 ```
 
@@ -51,6 +58,7 @@ docker run -d \
   -e CLIENT_SECRET="<your-whoop-client-secret>" \
   -e REDIRECT_URI="http://localhost:5000/callback" \
   -e SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data" \
+  -e SECRET_KEY="<a-long-random-string>" \
   docker.io/kryoseu/whoops:latest
 ```
 
@@ -58,6 +66,13 @@ Update `SQLALCHEMY_DATABASE_URI` depending on your database:
 
 - PostgreSQL: `postgresql+psycopg2://<user>:<password>@<host>:5432/whoop_data`
 - MySQL: `mysql+pymysql://<user>:<password>@<host>:3306/whoop_data`
+
+# Kubernetes (Helm)
+
+For Kubernetes deployments, use the Helm chart in the
+[rpi-k3s](https://github.com/szpaczyna/rpi-k3s) repository:
+`cluster/helm/whoops`. The manifests under `templates/` in this repository are
+legacy and may drift from the chart.
 
 # Usage
 
