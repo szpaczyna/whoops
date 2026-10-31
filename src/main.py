@@ -47,6 +47,15 @@ def create_app():
     # settings.toml (which is committed).
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
+    # Restore persisted Whoop tokens (if any) so restarts don't force re-auth.
+    with app.app_context():
+        try:
+            from src.models.token import load_tokens
+
+            load_tokens(app.config["WhoopClient"])
+        except Exception:  # noqa: BLE001
+            pass
+
     return app
 
 
