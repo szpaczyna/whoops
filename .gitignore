@@ -1,4 +1,6 @@
-.venv/
+.env
+graphify-out
+.venv
 
 *.pyc
 __pycache__/
@@ -12,3 +14,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+.DS_Store
+handoff*
