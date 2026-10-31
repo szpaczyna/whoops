@@ -22,6 +22,10 @@ def refresh_token_job(app):
     if whoop_client.needs_refresh():
         try:
             whoop_client.refresh_token()
+            with app.app_context():
+                from src.models.token import save_tokens
+
+                save_tokens(whoop_client)
             logger.info("Token refreshed successfully.")
         except requests.HTTPError:
             logger.error("Manual authorization required. Visit /authorize.")

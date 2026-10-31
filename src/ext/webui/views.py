@@ -63,7 +63,11 @@ def callback():
         return redirect(url_for("webui.index"))
 
     try:
-        current_app.config["WhoopClient"].set_tokens(code)
+        client = current_app.config["WhoopClient"]
+        client.set_tokens(code)
+        from src.models.token import save_tokens
+
+        save_tokens(client)
         flash("Authorized", "success")
 
     except requests.HTTPError as e:
