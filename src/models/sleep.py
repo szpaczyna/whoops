@@ -8,6 +8,7 @@ class WhoopSleep(db.Model):
     __tablename__ = "whoop_sleep"
 
     id = db.Column(db.String(36), primary_key=True)
+    user_id = db.Column(db.BigInteger, nullable=True)
     cycle_id = db.Column(db.BigInteger, nullable=False)
     timestamp = db.Column(db.DateTime(timezone=True), nullable=False, index=True)
     updated_at = db.Column(db.DateTime(timezone=True), nullable=True)
@@ -47,6 +48,7 @@ class WhoopSleep(db.Model):
 
         return cls(
             id=data["id"],  # type: ignore
+            user_id=data.get("user_id"),  # type: ignore
             cycle_id=data["cycle_id"],  # type: ignore
             timestamp=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),  # type: ignore
             updated_at=datetime.fromisoformat(  # type: ignore
@@ -80,6 +82,7 @@ class WhoopSleep(db.Model):
     def to_dict(self) -> Dict:
         return {
             "id": self.id,
+            "user_id": self.user_id,
             "cycle_id": self.cycle_id,
             "created_at": self.timestamp.isoformat(),
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

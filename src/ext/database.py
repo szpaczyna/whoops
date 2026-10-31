@@ -33,6 +33,16 @@ def query_all_between(model, start: datetime, end: datetime) -> List:
 
 def add_all(models):
     """Add a list of models to the database."""
+    models = list(models)
+    try:
+        db.session.add_all(models)
+        db.session.commit()
+        return
+    except IntegrityError:
+        db.session.rollback()
+
+    # Fall back to per-row commits so one duplicate/bad row does not discard
+    # the whole batch.
     for model in models:
         try:
             db.session.add(model)

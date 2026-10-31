@@ -1,7 +1,6 @@
 [default]
 ENV = "default"
 TITLE = "Whoops"
-SECRET_KEY = "Ix3867Ch4kl3"
 EXTENSIONS = [
   "flask_bootstrap:Bootstrap",
   "src.ext.database:init_app",

@@ -48,3 +48,21 @@ class WhoopDataResource(Resource):
             )
 
         return jsonify(data)
+
+
+class UserProfileResource(Resource):
+    def get(self):
+        whoop_client = current_app.config["WhoopClient"]
+        try:
+            return jsonify(whoop_client.get_profile_basic())
+        except requests.HTTPError as e:
+            abort(e.response.status_code, description=e)
+
+
+class UserBodyMeasurementResource(Resource):
+    def get(self):
+        whoop_client = current_app.config["WhoopClient"]
+        try:
+            return jsonify(whoop_client.get_body_measurement())
+        except requests.HTTPError as e:
+            abort(e.response.status_code, description=e)

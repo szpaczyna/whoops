@@ -6,3 +6,7 @@ readme = "README.md"
 [tool.pyright]
 include = ["src"]
 extraPaths = ["."]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

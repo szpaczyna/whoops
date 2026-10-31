@@ -31,10 +31,14 @@ def fill_backlog(app):
     whoop_client = app.config["WhoopClient"]
     import_queue = app.config["ImportQueue"]
 
-    import_queue.add(ImportTask(WhoopWorkout, whoop_client.get_workouts))
-    import_queue.add(ImportTask(WhoopCycle, whoop_client.get_cycles))
-    import_queue.add(ImportTask(WhoopSleep, whoop_client.get_sleeps))
-    import_queue.add(ImportTask(WhoopRecovery, whoop_client.get_recoveries))
+    for task in (
+        ImportTask(WhoopWorkout, whoop_client.get_workouts),
+        ImportTask(WhoopCycle, whoop_client.get_cycles),
+        ImportTask(WhoopSleep, whoop_client.get_sleeps),
+        ImportTask(WhoopRecovery, whoop_client.get_recoveries),
+    ):
+        if task not in import_queue:
+            import_queue.append(task)
 
     # request immediate import
     job = app.config["Scheduler"].get_job("import_worker")
@@ -50,7 +54,7 @@ def _import_worker(app):
 
     logger.info(f"Import queue size: {len(import_queue)}")
 
-    task = import_queue.pop()
+    task = import_queue.popleft()
     status = ImportStatus.STARTED
 
     try:
@@ -71,7 +75,8 @@ def _import_worker(app):
         elif status_code == 429:
             logger.exception("Rate limit hit, re-queueing task")
             status = ImportStatus.RATE_LIMIT
-            import_queue.add(task)
+            if task not in import_queue:
+                import_queue.append(task)
             raise
         else:
             logger.exception("Unexpected HTTP error")
@@ -80,13 +85,15 @@ def _import_worker(app):
     except requests.ConnectionError:
         logger.exception("Connection error, re-queueing task")
         status = ImportStatus.CONNECTION_ERROR
-        import_queue.add(task)
+        if task not in import_queue:
+            import_queue.append(task)
         raise
 
     except requests.Timeout:
         logger.exception("Request timed out, re-queueing task")
         status = ImportStatus.TIMEOUT
-        import_queue.add(task)
+        if task not in import_queue:
+            import_queue.append(task)
         raise
 
     except Exception:

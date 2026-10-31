@@ -1,5 +1,6 @@
 import logging
 import os
+from collections import deque
 
 from dynaconf import FlaskDynaconf
 from flask import Flask
@@ -13,6 +14,7 @@ REQUIRED_VARS = [
     "CLIENT_SECRET",
     "REDIRECT_URI",
     "SQLALCHEMY_DATABASE_URI",
+    "SECRET_KEY",
 ]
 
 
@@ -29,7 +31,7 @@ def create_app():
     app = Flask(__name__)
     FlaskDynaconf(app)
 
-    app.config["ImportQueue"] = set()
+    app.config["ImportQueue"] = deque()
     app.config["LastImportStatus"] = ImportStatus.NOT_STARTED
 
     app.config["WhoopClient"] = WhoopClient(
@@ -40,6 +42,10 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
     app.config.load_extensions()  # type: ignore
+
+    # SECRET_KEY is required and must come from the environment, never from
+    # settings.toml (which is committed).
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
     return app
 

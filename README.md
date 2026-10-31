@@ -1,4 +1,4 @@
-[![Python](https://img.shields.io/badge/python-3.13-blue?style=flat-square)](https://www.python.org/downloads/release/python-3130/)
+[![Python](https://img.shields.io/badge/python-3.15-blue?style=flat-square)](https://www.python.org/downloads/release/python-3150/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Ko--fi-red?style=flat-square)](https://ko-fi.com/kryoseu)
 # Whoops
