@@ -76,6 +76,10 @@ legacy and may drift from the chart.
 
 # Usage
 
+> [!NOTE]
+> OAuth tokens are persisted in the database, so restarting the application does
+> not require re-authorization. Tokens are refreshed automatically.
+
 1. Navigate to [http://localhost:5000/authorize](http://localhost:5000/authorize) to authorize Whoops to access your Whoop data.
 2. Navigate to [http://localhost:5000](http://localhost:5000) to set when import job runs or trigger a manual import.
 
