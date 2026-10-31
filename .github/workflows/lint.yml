@@ -1,4 +1,4 @@
-name: Lint
+name: Lint and test
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
           failure-threshold: error
 
       - name: Lint YAML
-        uses: ibiqlik/action-yamllint@v3
+        uses: ibiqlik/action-yamllint@v3.1.1
         with:
           file_or_dir: .github/workflows
           config_data: |
@@ -29,3 +29,22 @@ jobs:
               document-start: disable
               line-length: disable
               truthy: disable
+
+  test:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.15'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        run: python -m pytest -q
