@@ -1,0 +1,30 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: Lint YAML
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .github/workflows
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              truthy: disable
