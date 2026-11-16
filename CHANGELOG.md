@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.1](https://github.com/szpaczyna/whoops/compare/v1.3.0...v1.3.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* allow recoveries without spo2 and skip rows that violate constraints ([#15](https://github.com/szpaczyna/whoops/issues/15)) ([8eafe53](https://github.com/szpaczyna/whoops/commit/8eafe53efc7354688379041ba60839aab6e5695b))
+
+
+### Miscellaneous
+
+* ignore DL3018 for apk packages tracked by the base image ([cc60ac4](https://github.com/szpaczyna/whoops/commit/cc60ac49be5c35909b33c7248709f0e3455f4328))
+
 ## [1.3.0](https://github.com/szpaczyna/whoops/compare/v1.2.2...v1.3.0) (2026-11-16)
 
 
