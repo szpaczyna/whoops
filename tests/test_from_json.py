@@ -18,3 +18,26 @@ def test_active_cycle_without_end():
     assert cycle.id == 1
     assert cycle.end is None
     assert cycle.score_state == "PENDING_SCORE"
+
+
+def test_recovery_without_spo2_and_skin_temp():
+    from src.models.recovery import WhoopRecovery
+
+    data = {
+        "sleep_id": "7e6ed812-e80d-4bbf-9f7a-9fd19a84e47e",
+        "cycle_id": 1900645906,
+        "user_id": 29791235,
+        "created_at": "2026-10-25T03:25:37.286Z",
+        "updated_at": "2026-10-25T06:10:27.431Z",
+        "score_state": "SCORED",
+        "score": {
+            "user_calibrating": False,
+            "recovery_score": 99,
+            "resting_heart_rate": 62,
+            "hrv_rmssd_milli": 48.06833,
+            "spo2_percentage": None,
+        },
+    }
+    recovery = WhoopRecovery.from_json(data)
+    assert recovery.spo2_perc is None
+    assert recovery.skin_temp_celsius is None
