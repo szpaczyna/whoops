@@ -17,6 +17,18 @@ REQUIRED_VARS = [
     "SECRET_KEY",
 ]
 
+logger = logging.getLogger(__name__)
+
+
+def _persist_tokens(app, client):
+    from src.models.token import save_tokens
+
+    try:
+        with app.app_context():
+            save_tokens(client)
+    except Exception:  # noqa: BLE001 - the refreshed token stays usable in memory
+        logger.exception("Could not persist refreshed tokens")
+
 
 def create_app():
     for var in REQUIRED_VARS:
@@ -37,12 +49,14 @@ def create_app():
     app.config["WhoopClient"] = WhoopClient(
         os.getenv("CLIENT_ID", ""),
         os.getenv("CLIENT_SECRET", ""),
+        on_refresh=lambda client: _persist_tokens(app, client),
     )
     app.config["REDIRECT_URI"] = os.getenv("REDIRECT_URI")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
     # Ensure all models are registered before create_all() runs inside
     # load_extensions() (otherwise new tables like whoop_token are missing).
+    from src.models import schedule as _schedule  # noqa: F401
     from src.models import token as _token  # noqa: F401
 
     app.config.load_extensions()  # type: ignore

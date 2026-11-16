@@ -38,7 +38,9 @@
     <input type="number" id="minute-input" min="0" max="59" class="form-control">
 
     <button id="schedule-button" class="btn btn-success">Schedule import</button>
-    <p class="small text-muted"> Import will run daily at the chosen time. </p>
+    <button id="unschedule-button" class="btn btn-danger" style="display: none;">Disable</button>
+    <p id="schedule-label" class="small"></p>
+    <p class="small text-muted"> Import will run daily at the chosen time (UTC) and fetch recent records only. Import Now fetches the full history. </p>
   </div>
 
 

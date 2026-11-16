@@ -1,13 +1,16 @@
 from enum import Enum
-from typing import Callable
+from datetime import datetime
+from typing import Callable, Optional
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
 class ImportTask:
     model: type
     callable: Callable
+    start: Optional[datetime] = None
+    retried_after_401: bool = field(default=False, compare=False)
 
 
 class ImportStatus(Enum):

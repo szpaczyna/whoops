@@ -1,6 +1,7 @@
 [default]
 ENV = "default"
 TITLE = "Whoops"
+INCREMENTAL_IMPORT_DAYS = 7
 EXTENSIONS = [
   "flask_bootstrap:Bootstrap",
   "src.ext.database:init_app",

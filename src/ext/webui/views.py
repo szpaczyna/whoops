@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from apscheduler.jobstores.base import JobLookupError
 from flask import (
     abort,
     current_app,
@@ -13,9 +14,10 @@ from flask import (
 )
 
 from src.ext.database import query_all
-from src.ext.jobs import fill_backlog
+from src.ext.jobs import IMPORT_JOB_ID, fill_backlog, register_import_job
 from src.models.cycle import WhoopCycle
 from src.models.recovery import WhoopRecovery
+from src.models.schedule import clear_schedule, load_schedule, save_schedule
 from src.models.sleep import WhoopSleep
 from src.models.workout import WhoopWorkout
 from src.utils import ImportStatus
@@ -89,13 +91,22 @@ def manual_import():
 
 def schedule():
     """
-    Schedule data import.
+    Schedule (POST) or disable (DELETE) the daily data import.
     """
 
     scheduler = current_app.config.get("Scheduler")
 
     if not scheduler:
         return {"error": "Scheduler not configured"}, 500
+
+    if request.method == "DELETE":
+        clear_schedule()
+        try:
+            scheduler.remove_job(IMPORT_JOB_ID)
+        except JobLookupError:
+            pass
+        logger.info("Import job disabled")
+        return {"message": "Import schedule disabled"}, 200
 
     data = request.get_json()
 
@@ -117,15 +128,8 @@ def schedule():
     except ValueError:
         abort(400, description="Invalid input")
 
-    scheduler.add_job(
-        func=fill_backlog,
-        trigger="cron",
-        hour=hour,
-        minute=minute,
-        args=[current_app._get_current_object()],  # type: ignore
-        id="import_job",
-        replace_existing=True,
-    )
+    save_schedule(hour, minute)
+    register_import_job(current_app._get_current_object(), hour, minute)  # type: ignore
 
     logger.info("Import job scheduled")
 
@@ -139,5 +143,10 @@ def status():
 
     import_queue = current_app.config.get("ImportQueue", [])
     last_status = current_app.config.get("LastImportStatus", ImportStatus.UNKNOWN)
+    saved = load_schedule()
 
-    return {"backlog": len(import_queue), "last_status": last_status.value}, 200
+    return {
+        "backlog": len(import_queue),
+        "last_status": last_status.value,
+        "schedule": {"hour": saved[0], "minute": saved[1]} if saved else None,
+    }, 200

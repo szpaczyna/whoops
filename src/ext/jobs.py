@@ -1,11 +1,13 @@
+import dataclasses
 import datetime
 import logging
 
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from src.ext.database import add_all
+from src.ext.database import upsert_all
 from src.models import WhoopCycle, WhoopRecovery, WhoopSleep, WhoopWorkout
+from src.models.schedule import load_schedule
 from src.retry import retry
 from src.utils import ImportStatus, ImportTask
 
@@ -14,32 +16,33 @@ logger = logging.getLogger(__name__)
 logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 
+IMPORT_JOB_ID = "import_job"
+
 
 def refresh_token_job(app):
     logger.info("Running refresh token job")
 
     whoop_client = app.config["WhoopClient"]
-    if whoop_client.needs_refresh():
-        try:
-            whoop_client.refresh_token()
-            with app.app_context():
-                from src.models.token import save_tokens
+    if not whoop_client.tokens:
+        logger.error("Manual authorization required. Visit /authorize.")
+        return
 
-                save_tokens(whoop_client)
+    try:
+        if whoop_client.ensure_fresh_token():
             logger.info("Token refreshed successfully.")
-        except requests.HTTPError:
-            logger.error("Manual authorization required. Visit /authorize.")
+    except requests.HTTPError:
+        logger.error("Manual authorization required. Visit /authorize.")
 
 
-def fill_backlog(app):
+def fill_backlog(app, start=None):
     whoop_client = app.config["WhoopClient"]
     import_queue = app.config["ImportQueue"]
 
     for task in (
-        ImportTask(WhoopWorkout, whoop_client.get_workouts),
-        ImportTask(WhoopCycle, whoop_client.get_cycles),
-        ImportTask(WhoopSleep, whoop_client.get_sleeps),
-        ImportTask(WhoopRecovery, whoop_client.get_recoveries),
+        ImportTask(WhoopWorkout, whoop_client.get_workouts, start),
+        ImportTask(WhoopCycle, whoop_client.get_cycles, start),
+        ImportTask(WhoopSleep, whoop_client.get_sleeps, start),
+        ImportTask(WhoopRecovery, whoop_client.get_recoveries, start),
     ):
         if task not in import_queue:
             import_queue.append(task)
@@ -47,6 +50,33 @@ def fill_backlog(app):
     # request immediate import
     job = app.config["Scheduler"].get_job("import_worker")
     job.modify(next_run_time=datetime.datetime.now())
+
+
+def incremental_backlog(app):
+    days = int(app.config.get("INCREMENTAL_IMPORT_DAYS", 7))
+    start = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    logger.info(f"Starting incremental import from {start.isoformat()}")
+    fill_backlog(app, start=start)
+
+
+def register_import_job(app, hour: int, minute: int):
+    app.config["Scheduler"].add_job(
+        func=incremental_backlog,
+        trigger="cron",
+        hour=hour,
+        minute=minute,
+        args=[app],
+        id=IMPORT_JOB_ID,
+        replace_existing=True,
+    )
+
+
+def _refresh_after_401(app) -> bool:
+    try:
+        app.config["WhoopClient"].refresh_token()
+        return True
+    except requests.HTTPError:
+        return False
 
 
 @retry(requests.HTTPError, tries=6, delay=4, backoff=2)
@@ -62,9 +92,9 @@ def _import_worker(app):
     status = ImportStatus.STARTED
 
     try:
-        result = task.callable()
+        result = task.callable(start=task.start)
         with app.app_context():
-            add_all(result)
+            upsert_all(result)
 
         logger.info(f"{task.model.__name__} imported successfully ({len(result)})")
         status = ImportStatus.SUCCESS
@@ -73,9 +103,13 @@ def _import_worker(app):
         status_code = getattr(e.response, "status_code", None)
 
         if status_code == 401:
-            logger.exception("Unauthorized error")
-            status = ImportStatus.UNAUTHORIZED
-            import_queue.clear()
+            if not task.retried_after_401 and _refresh_after_401(app):
+                logger.warning(f"Unauthorized during {task.model.__name__} import, token refreshed, re-queueing task")
+                import_queue.appendleft(dataclasses.replace(task, retried_after_401=True))
+            else:
+                logger.exception("Unauthorized error")
+                status = ImportStatus.UNAUTHORIZED
+                import_queue.clear()
         elif status_code == 429:
             logger.exception("Rate limit hit, re-queueing task")
             status = ImportStatus.RATE_LIMIT
@@ -131,3 +165,14 @@ def init_app(app):
     app.config["Scheduler"] = scheduler
 
     scheduler.start()
+
+    with app.app_context():
+        try:
+            saved = load_schedule()
+        except Exception:  # noqa: BLE001 - startup must not fail on a missing table
+            logger.exception("Could not load import schedule")
+            saved = None
+
+    if saved:
+        register_import_job(app, *saved)
+        logger.info(f"Import job restored at {saved[0]:02d}:{saved[1]:02d} UTC")
