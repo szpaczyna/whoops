@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.3.0](https://github.com/szpaczyna/whoops/compare/v1.2.2...v1.3.0) (2026-11-16)
+
+
+### Features
+
+* fetch only the last INCREMENTAL_IMPORT_DAYS in the scheduled import, with limit=25 per page ([62184ed](https://github.com/szpaczyna/whoops/commit/62184ed271e696ef93e88a66861ff533ecba37cc))
+* persist the daily import schedule and allow disabling it ([62184ed](https://github.com/szpaczyna/whoops/commit/62184ed271e696ef93e88a66861ff533ecba37cc))
+* updated grafana dasbhoards ([c07d376](https://github.com/szpaczyna/whoops/commit/c07d37678118cd32825558304799b06091a8ba40))
+
+
+### Bug Fixes
+
+* disable docker build on push to main ([4e80d7d](https://github.com/szpaczyna/whoops/commit/4e80d7d3e57f8d2cf1b0b9f52649b1a0f7035151))
+* upsert imported records and refresh token before expiry ([#9](https://github.com/szpaczyna/whoops/issues/9)) ([62184ed](https://github.com/szpaczyna/whoops/commit/62184ed271e696ef93e88a66861ff533ecba37cc))
+
+
+### Miscellaneous
+
+* upgrade setup python to v7 ([d152d12](https://github.com/szpaczyna/whoops/commit/d152d1205d1987cc35915f5695e923249bb7ebea))
+
+
+### Documentation
+
+* align kubernetes example with the helm chart ([62184ed](https://github.com/szpaczyna/whoops/commit/62184ed271e696ef93e88a66861ff533ecba37cc))
+
 ## [1.2.2](https://github.com/szpaczyna/whoops/compare/v1.2.1...v1.2.2) (2026-10-31)
 
 
