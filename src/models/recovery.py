@@ -19,8 +19,8 @@ class WhoopRecovery(db.Model):
     recovery_score = db.Column(db.Integer, nullable=False)
     resting_heart_rate = db.Column(db.Integer, nullable=False)
     hrv_rmssd_ms = db.Column(db.Float, nullable=False)
-    spo2_perc = db.Column(db.Float, nullable=False)
-    skin_temp_celsius = db.Column(db.Float, nullable=False)
+    spo2_perc = db.Column(db.Float, nullable=True)
+    skin_temp_celsius = db.Column(db.Float, nullable=True)
 
     @classmethod
     def from_json(cls, data: dict) -> "WhoopRecovery":
@@ -39,8 +39,8 @@ class WhoopRecovery(db.Model):
             recovery_score=score["recovery_score"],  # type: ignore
             resting_heart_rate=score["resting_heart_rate"],  # type: ignore
             hrv_rmssd_ms=score["hrv_rmssd_milli"],  # type: ignore
-            spo2_perc=score["spo2_percentage"],  # type: ignore
-            skin_temp_celsius=score["skin_temp_celsius"],  # type: ignore
+            spo2_perc=score.get("spo2_percentage"),  # type: ignore
+            skin_temp_celsius=score.get("skin_temp_celsius"),  # type: ignore
         )
 
     def to_dict(self) -> Dict:

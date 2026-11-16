@@ -89,9 +89,27 @@ def test_upsert_all_preloads_existing_rows_in_one_select(app):
         assert len(statements) == 1
 
 
-def test_upsert_all_rolls_back_and_raises(app):
+def test_upsert_all_rolls_back_and_raises(app, monkeypatch):
     with app.app_context():
         upsert_all([Item(name="a")])
-        with pytest.raises(Exception):
-            upsert_all([Item(name="a")])
+        monkeypatch.setattr(db.session, "merge", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
+        with pytest.raises(RuntimeError):
+            upsert_all([Item(name="b")])
+        monkeypatch.undo()
         assert db.session.query(Item).count() == 1
+
+
+def test_upsert_all_skips_rows_that_violate_constraints(app, caplog):
+    with app.app_context():
+        upsert_all([Item(name="a")])
+        upsert_all([Item(name="b"), Item(name="a"), Item(name="c")])
+        assert sorted(i.name for i in db.session.query(Item).all()) == ["a", "b", "c"]
+    assert "Skipped Item" in caplog.text
+
+
+def test_upsert_all_null_in_not_null_column_keeps_other_rows(app, caplog):
+    with app.app_context():
+        upsert_all([Record(id="1"), Item(name=None), Record(id="2")])
+        assert db.session.query(Record).count() == 2
+        assert db.session.query(Item).count() == 0
+    assert "Skipped Item" in caplog.text
