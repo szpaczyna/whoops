@@ -70,20 +70,24 @@ Update `SQLALCHEMY_DATABASE_URI` depending on your database:
 
 For Kubernetes deployments, use the Helm chart in the
 [rpi-k3s](https://github.com/szpaczyna/rpi-k3s) repository:
-`cluster/helm/whoops`. The manifests under `templates/` in this repository are
-legacy and may drift from the chart.
+`cluster/helm/whoops`. `templates/kubernetes.yaml` is a plain-manifest version
+of the same chart: a `whoops-env` Secret, Service, Deployment and Gateway API
+`HTTPRoute`.
 
 # Usage
 
 > [!NOTE]
-> OAuth tokens are persisted in the database, so restarting the application does
-> not require re-authorization. Tokens are refreshed automatically.
+> OAuth tokens and the daily import time are persisted in the database, so
+> restarting the application does not require re-authorization or
+> rescheduling. Tokens are refreshed automatically before they expire.
 
 1. Navigate to [http://localhost:5000/authorize](http://localhost:5000/authorize) to authorize Whoops to access your Whoop data.
-2. Navigate to [http://localhost:5000](http://localhost:5000) to set when import job runs or trigger a manual import.
+2. Navigate to [http://localhost:5000](http://localhost:5000) to set when import job runs, disable it, or trigger a manual import.
 
 > [!TIP]
-> The app will automatically refresh tokens and import your data every 24 hours.
+> The scheduled daily import fetches the last `INCREMENTAL_IMPORT_DAYS` days
+> (default 7, override with `FLASK_INCREMENTAL_IMPORT_DAYS`) and updates records
+> that Whoop rescored. "Import Now" fetches the full history.
 
 # Visualizing Your Data
 

@@ -24,6 +24,17 @@ export const API = {
     }
   },
 
+  async deleteSchedule() {
+    try {
+      const response = await fetch("/schedule", { method: "DELETE" });
+      if (!response.ok) throw new Error(`Failed to disable schedule (status: ${response.status})`);
+      const data = await response.json();
+      return { success: true, message: data.message };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
   async getImportStatus() {
     try {
       const response = await fetch("/import/status");

@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from .views import authorize, callback, manual_import, index, schedule, status
 
-schedule.methods = ["POST"]  # type: ignore
+schedule.methods = ["POST", "DELETE"]  # type: ignore
 manual_import.methods = ["POST"]  # type: ignore
 
 bp = Blueprint(

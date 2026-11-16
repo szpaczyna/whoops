@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const wait = document.querySelector(".wait");
   const importBtn = document.getElementById("import-button");
   const scheduleBtn = document.getElementById("schedule-button");
+  const unscheduleBtn = document.getElementById("unschedule-button");
 
   importBtn.addEventListener("click", async () => {
     importBtn.disabled = true;
@@ -36,14 +37,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const result = await API.scheduleImport(hour, minute);
     showAlert(result.message, result.success ? "success" : "danger");
+    fetchImportStatus();
   });
 
-  fetchImportStatus();
+  unscheduleBtn.addEventListener("click", async () => {
+    const result = await API.deleteSchedule();
+    showAlert(result.message, result.success ? "success" : "danger");
+    fetchImportStatus();
+  });
+
+  fetchImportStatus({ prefill: true });
   startPolling();
 });
 
 
-async function fetchImportStatus() {
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function renderSchedule(schedule, prefill) {
+  const label = document.getElementById("schedule-label");
+  const unscheduleBtn = document.getElementById("unschedule-button");
+
+  if (schedule) {
+    label.textContent = `Daily import: ${pad(schedule.hour)}:${pad(schedule.minute)} UTC`;
+    unscheduleBtn.style.display = "";
+  } else {
+    label.textContent = "No daily import";
+    unscheduleBtn.style.display = "none";
+  }
+
+  if (prefill && schedule) {
+    document.getElementById("hour-input").value = schedule.hour;
+    document.getElementById("minute-input").value = schedule.minute;
+  }
+}
+
+async function fetchImportStatus({ prefill = false } = {}) {
   const result = await API.getImportStatus();
 
   if (!result.success) {
@@ -51,7 +81,8 @@ async function fetchImportStatus() {
     return;
   }
 
-  const { backlog, last_status } = result.data;
+  const { backlog, last_status, schedule } = result.data;
+  renderSchedule(schedule, prefill);
 
   const backlogBadge = document.getElementById("backlog-badge");
   const statusBadge = document.getElementById("status-badge");

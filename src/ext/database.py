@@ -1,9 +1,10 @@
 import logging
+from collections import defaultdict
 from datetime import datetime
 from typing import List
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import inspect as sa_inspect
 
 logger = logging.getLogger(__name__)
 
@@ -31,26 +32,35 @@ def query_all_between(model, start: datetime, end: datetime) -> List:
         raise
 
 
-def add_all(models):
-    """Add a list of models to the database."""
-    models = list(models)
-    try:
-        db.session.add_all(models)
-        db.session.commit()
-        return
-    except IntegrityError:
-        db.session.rollback()
+_PRELOAD_CHUNK = 500
 
-    # Fall back to per-row commits so one duplicate/bad row does not discard
-    # the whole batch.
+
+def upsert_all(models):
+    """Insert new rows and update existing ones, matched by primary key."""
+    by_class = defaultdict(list)
     for model in models:
-        try:
-            db.session.add(model)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-        except Exception:
-            raise
+        by_class[type(model)].append(model)
+
+    try:
+        for cls, items in by_class.items():
+            mapper = sa_inspect(cls)
+            pk_column = mapper.primary_key[0]
+            pk_attr = mapper.get_property_by_column(pk_column).key
+            ids = [getattr(m, pk_attr) for m in items if getattr(m, pk_attr) is not None]
+
+            # Keep a strong reference so merge() finds the rows in the identity map
+            # instead of issuing one SELECT per row.
+            loaded = []
+            for i in range(0, len(ids), _PRELOAD_CHUNK):
+                chunk = ids[i : i + _PRELOAD_CHUNK]
+                loaded.extend(db.session.query(cls).filter(pk_column.in_(chunk)).all())
+
+            for model in items:
+                db.session.merge(model)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def _migrate_schema():

@@ -1,28 +1,18 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# Mirrors the Helm chart in https://github.com/szpaczyna/rpi-k3s/tree/main/cluster/helm/whoops
+apiVersion: v1
+kind: Secret
 metadata:
-  annotations:
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  name: whoops
+  name: whoops-env
   namespace: whoops
-spec:
-  ingressClassName: "nginx"
-  rules:
-    - host: <host>
-      http:
-        paths:
-          - backend:
-              service:
-                name: whoops
-                port:
-                  number: 5000
-            path: /
-            pathType: Prefix
-  tls:
-    - hosts:
-        - <host>
-      secretName: whoops-tls-prod
+type: Opaque
+stringData:
+  CLIENT_ID: "<your-whoop-client-id-here>"
+  CLIENT_SECRET: "<your-whoop-client-secret-here>"
+  REDIRECT_URI: "https://<host>/callback"
+  SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://<user>:<password>@<whoop-postgres-service>.<namespace>.svc.cluster.local:5432/whoop_data"
+  SECRET_KEY: "<a-long-random-string>"
+  # Days fetched by the scheduled daily import (default 7).
+  # FLASK_INCREMENTAL_IMPORT_DAYS: "7"
 ---
 apiVersion: v1
 kind: Service
@@ -30,10 +20,11 @@ metadata:
   name: whoops
   namespace: whoops
 spec:
+  type: ClusterIP
   selector:
     app: whoops
   ports:
-    - protocol: "TCP"
+    - protocol: TCP
       port: 5000
       targetPort: 5000
 ---
@@ -43,10 +34,10 @@ metadata:
   name: whoops
   namespace: whoops
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: whoops
-  replicas: 1
   template:
     metadata:
       labels:
@@ -54,16 +45,39 @@ spec:
     spec:
       containers:
         - name: whoops
-          image: docker.io/kryoseu/whoops:latest
+          image: docker.io/szpaczyn/whoops:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
-          env:
-            - name: CLIENT_ID
-              value: "<your-whoop-client-id-here>"
-            - name: CLIENT_SECRET
-              value: "<your-shoop-client-secret-here>"
-            - name: REDIRECT_URI
-              value: "https://<host>/callback"
-            - name: SQLALCHEMY_DATABASE_URI
-              value: "postgresql+psycopg2://whoops:whoops@<whoop-postgres-service>.<namespace>.svc.cluster.local:5432/whoop_data"
+          envFrom:
+            - secretRef:
+                name: whoops-env
+          resources:
+            limits:
+              cpu: 250m
+              memory: 192Mi
+            requests:
+              cpu: 50m
+              memory: 96Mi
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: whoops
+  namespace: whoops
+spec:
+  parentRefs:
+    - name: <gateway-name>
+      namespace: <gateway-namespace>
+      kind: Gateway
+      sectionName: <https-listener>
+  hostnames:
+    - "<host>"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: whoops
+          port: 5000
