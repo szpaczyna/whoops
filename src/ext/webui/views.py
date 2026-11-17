@@ -13,7 +13,7 @@ from flask import (
     url_for,
 )
 
-from src.ext.database import query_all
+from src.ext.database import db
 from src.ext.jobs import IMPORT_JOB_ID, fill_backlog, register_import_job
 from src.models.cycle import WhoopCycle
 from src.models.recovery import WhoopRecovery
@@ -29,17 +29,12 @@ def index():
     """
     Retrieve data from database.
     """
-    cycles = query_all(WhoopCycle)
-    sleeps = query_all(WhoopSleep)
-    recoveries = query_all(WhoopRecovery)
-    workouts = query_all(WhoopWorkout)
-
     return render_template(
         "index.html",
-        cycles=cycles,
-        sleeps=sleeps,
-        recoveries=recoveries,
-        workouts=workouts,
+        cycle_count=db.session.query(WhoopCycle).count(),
+        sleep_count=db.session.query(WhoopSleep).count(),
+        recovery_count=db.session.query(WhoopRecovery).count(),
+        workout_count=db.session.query(WhoopWorkout).count(),
     )
 
 
