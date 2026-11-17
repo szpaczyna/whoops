@@ -123,30 +123,11 @@ class WhoopClient:
     def get_workouts(self, start: Optional[datetime] = None) -> List[WhoopWorkout]:
         return self._fetch_paginated("activity/workout", WhoopWorkout, start)
 
-    # Single-record and user endpoints (Whoop API v2)
-    def get_cycle(self, cycle_id: int) -> WhoopCycle:
-        return WhoopCycle.from_json(self._get(f"cycle/{cycle_id}"))
-
-    def get_cycle_recovery(self, cycle_id: int) -> WhoopRecovery:
-        return WhoopRecovery.from_json(self._get(f"cycle/{cycle_id}/recovery"))
-
-    def get_cycle_sleep(self, cycle_id: int) -> WhoopSleep:
-        return WhoopSleep.from_json(self._get(f"cycle/{cycle_id}/sleep"))
-
-    def get_sleep(self, sleep_id: str) -> WhoopSleep:
-        return WhoopSleep.from_json(self._get(f"activity/sleep/{sleep_id}"))
-
-    def get_workout(self, workout_id: str) -> WhoopWorkout:
-        return WhoopWorkout.from_json(self._get(f"activity/workout/{workout_id}"))
-
     def get_profile_basic(self) -> Dict:
         return self._get("user/profile/basic")
 
     def get_body_measurement(self) -> Dict:
         return self._get("user/measurement/body")
-
-    def delete_access(self) -> None:
-        self._delete("user/access")
 
     def _fetch_paginated(
         self,
@@ -180,12 +161,6 @@ class WhoopClient:
         response = requests.get(url, headers=self._auth_header())
         response.raise_for_status()
         return response.json()
-
-    def _delete(self, endpoint: str) -> None:
-        """Generic DELETE against the Whoop API v2."""
-        url = f"{API_ENDPOINT}{API_VERSION}/{endpoint}"
-        response = requests.delete(url, headers=self._auth_header())
-        response.raise_for_status()
 
     def _post_token_request(self, data: Dict) -> Dict:
         """Internal helper to post to the token endpoint."""
