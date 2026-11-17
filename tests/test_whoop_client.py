@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
 
-from src.whoop import WhoopClient
+from src.whoop import HTTP_TIMEOUT, WhoopClient
 
 
 def test_authorization_url_scopes():
@@ -27,6 +27,25 @@ def test_get_profile_basic_url():
     assert result["email"] == "a@b.com"
     called_url = mock_get.call_args.args[0]
     assert called_url.endswith("developer/v2/user/profile/basic")
+
+
+def test_get_passes_timeout():
+    client = WhoopClient("id", "secret")
+    client.tokens = {"access_token": "tok"}
+    with patch("src.whoop.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: {})
+        mock_get.return_value.raise_for_status = MagicMock()
+        client.get_profile_basic()
+    assert mock_get.call_args.kwargs["timeout"] == HTTP_TIMEOUT
+
+
+def test_token_request_passes_timeout():
+    client = WhoopClient("id", "secret")
+    with patch("src.whoop.requests.post") as mock_post:
+        mock_post.return_value = MagicMock(json=lambda: {"access_token": "tok"})
+        mock_post.return_value.raise_for_status = MagicMock()
+        client._post_token_request({})
+    assert mock_post.call_args.kwargs["timeout"] == HTTP_TIMEOUT
 
 
 import threading
@@ -56,6 +75,7 @@ def test_fetch_paginated_sends_limit_without_start():
         client.get_workouts()
     params = mock_get.call_args.kwargs["params"]
     assert params == {"limit": 25}
+    assert mock_get.call_args.kwargs["timeout"] == HTTP_TIMEOUT
 
 
 def test_fetch_paginated_sends_start_on_every_page():

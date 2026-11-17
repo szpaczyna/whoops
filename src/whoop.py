@@ -17,6 +17,7 @@ from src.models.workout import WhoopWorkout
 API_ENDPOINT = "https://api.prod.whoop.com/"
 API_VERSION = "developer/v2"
 PAGE_LIMIT = 25
+HTTP_TIMEOUT = 30
 DEFAULT_EXPIRES_IN = 3600
 # refresh_token_job runs every 5 minutes, so a 10 minute margin refreshes 5-10 minutes before expiry.
 REFRESH_MARGIN = timedelta(minutes=10)
@@ -142,7 +143,7 @@ class WhoopClient:
         results: List[Model] = []
 
         while True:
-            response = requests.get(url, headers=self._auth_header(), params=dict(params))
+            response = requests.get(url, headers=self._auth_header(), params=dict(params), timeout=HTTP_TIMEOUT)
             response.raise_for_status()
             data = response.json()
 
@@ -157,14 +158,14 @@ class WhoopClient:
     def _get(self, endpoint: str) -> Dict:
         """Generic single-resource GET against the Whoop API v2."""
         url = f"{API_ENDPOINT}{API_VERSION}/{endpoint}"
-        response = requests.get(url, headers=self._auth_header())
+        response = requests.get(url, headers=self._auth_header(), timeout=HTTP_TIMEOUT)
         response.raise_for_status()
         return response.json()
 
     def _post_token_request(self, data: Dict) -> Dict:
         """Internal helper to post to the token endpoint."""
         url = f"{API_ENDPOINT}oauth/oauth2/token"
-        response = requests.post(url, data=data)
+        response = requests.post(url, data=data, timeout=HTTP_TIMEOUT)
         response.raise_for_status()
         return response.json()
 
