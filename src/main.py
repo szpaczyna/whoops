@@ -72,7 +72,7 @@ def create_app():
 
             load_tokens(app.config["WhoopClient"])
         except Exception:  # noqa: BLE001
-            pass
+            logger.exception("Could not restore saved Whoop tokens")
 
     return app
 

@@ -1,7 +1,9 @@
+import logging
+
 import pytest
 from sqlalchemy import event
 
-from src.ext.database import db, upsert_all
+from src.ext.database import _migrate_schema, db, upsert_all
 
 
 class Item(db.Model):
@@ -113,3 +115,12 @@ def test_upsert_all_null_in_not_null_column_keeps_other_rows(app, caplog):
         assert db.session.query(Record).count() == 2
         assert db.session.query(Item).count() == 0
     assert "Skipped Item" in caplog.text
+
+
+def test_migrate_schema_logs_skipped_statements_at_info(app, caplog):
+    caplog.set_level(logging.INFO, logger="src.ext.database")
+    with app.app_context():
+        _migrate_schema()
+    assert any(
+        r.levelno == logging.INFO and "Migration statement skipped" in r.getMessage() for r in caplog.records
+    )

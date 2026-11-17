@@ -130,7 +130,7 @@ def _migrate_schema():
             db.session.commit()
         except Exception as exc:  # noqa: BLE001 - best effort
             db.session.rollback()
-            logger.debug("Migration statement skipped: %s (%s)", stmt, exc)
+            logger.info("Migration statement skipped: %s (%s)", stmt, exc)
 
 
 def init_app(app):
