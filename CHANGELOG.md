@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.3.2](https://github.com/szpaczyna/whoops/compare/v1.3.1...v1.3.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* add timeouts to Whoop API requests ([#19](https://github.com/szpaczyna/whoops/issues/19)) ([0ef5eda](https://github.com/szpaczyna/whoops/commit/0ef5eda6b2a0797eec599ae8dd3325c725dc05e9))
+* count rows instead of loading full tables on the index page ([#27](https://github.com/szpaczyna/whoops/issues/27)) ([a14db63](https://github.com/szpaczyna/whoops/commit/a14db631c629dc44b6bb4b32667d6bc7b6f4353b))
+* log token restore and migration failures at startup ([#28](https://github.com/szpaczyna/whoops/issues/28)) ([05551d8](https://github.com/szpaczyna/whoops/commit/05551d8885e2d7df0ab6e3e00e38aff7b6c9d6d8))
+* publish ports on localhost only in the compose template ([#20](https://github.com/szpaczyna/whoops/issues/20)) ([07f5665](https://github.com/szpaczyna/whoops/commit/07f5665cd2f324f0737483c8ffcc54bafe8c79ff))
+* re-queue failed import tasks without retrying the worker ([#23](https://github.com/szpaczyna/whoops/issues/23)) ([9dd0146](https://github.com/szpaczyna/whoops/commit/9dd0146210d45fe2e5a9f50f6f1417c1cdb2484e))
+* skip unscored sleeps and recoveries during import ([#18](https://github.com/szpaczyna/whoops/issues/18)) ([f876d7f](https://github.com/szpaczyna/whoops/commit/f876d7f3a1579711b63ec02340b34321dab82671))
+* use a random single-use OAuth state ([#21](https://github.com/szpaczyna/whoops/issues/21)) ([4d33378](https://github.com/szpaczyna/whoops/commit/4d3337880c8beb69f1537fd2eac961f42cd85783))
+* use Recreate strategy for the Kubernetes deployment ([#22](https://github.com/szpaczyna/whoops/issues/22)) ([9065f05](https://github.com/szpaczyna/whoops/commit/9065f05e7f4c1869f1c686c58fdbbc77d231e63a))
+
+
+### Miscellaneous
+
+* **deps:** update dependency apscheduler to v3.11.3 ([#10](https://github.com/szpaczyna/whoops/issues/10)) ([b8f4a33](https://github.com/szpaczyna/whoops/commit/b8f4a33ac81208f623bc623c5d822cc083881585))
+* **deps:** update dependency cryptography to v50.0.2 ([#11](https://github.com/szpaczyna/whoops/issues/11)) ([ed1f4d1](https://github.com/szpaczyna/whoops/commit/ed1f4d1372b0424d0ceee0bb0716e82bb0d0acf6))
+* **deps:** update dependency flask to v3.1.3 ([#13](https://github.com/szpaczyna/whoops/issues/13)) ([fa3c04d](https://github.com/szpaczyna/whoops/commit/fa3c04d9390e984b77b12330754ebc230dbdfb07))
+* **deps:** update dependency flask-restful to v0.3.10 ([#14](https://github.com/szpaczyna/whoops/issues/14)) ([051b83c](https://github.com/szpaczyna/whoops/commit/051b83cfc32a8cdea823309ede3a6c9b12a5f30f))
+* **deps:** update dependency psycopg2 to v2.9.13 ([#16](https://github.com/szpaczyna/whoops/issues/16)) ([08dc94c](https://github.com/szpaczyna/whoops/commit/08dc94c8a61eded40ef615877fa3fa3db742c67d))
+* **deps:** update dependency pymysql to v1.2.4 ([#29](https://github.com/szpaczyna/whoops/issues/29)) ([20a5ab9](https://github.com/szpaczyna/whoops/commit/20a5ab97aec5de574256e890402545de1d684cc4))
+* **deps:** update dependency requests to v2.33.0 [security] ([#33](https://github.com/szpaczyna/whoops/issues/33)) ([ebb5627](https://github.com/szpaczyna/whoops/commit/ebb5627d459860c8f1f155ba2b9fededac6acb74))
+* remove unused export template ([#25](https://github.com/szpaczyna/whoops/issues/25)) ([9ad6899](https://github.com/szpaczyna/whoops/commit/9ad6899bffed76192d8055f31d37756debd9f360))
+
+
+### Refactoring
+
+* remove unused Whoop client methods ([#24](https://github.com/szpaczyna/whoops/issues/24)) ([94cd4c3](https://github.com/szpaczyna/whoops/commit/94cd4c3b341479c2cf35a171432ce57e9e4229a5))
+* serve model routes from one REST resource ([#26](https://github.com/szpaczyna/whoops/issues/26)) ([37e3485](https://github.com/szpaczyna/whoops/commit/37e3485f4025e74c0ebcecd04db0e1fa13a9fe89))
+
 ## [1.3.1](https://github.com/szpaczyna/whoops/compare/v1.3.0...v1.3.1) (2026-11-16)
 
 
