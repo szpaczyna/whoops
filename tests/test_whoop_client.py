@@ -153,3 +153,55 @@ def test_refresh_failure_propagates():
     with patch.object(client, "_post_token_request", side_effect=requests.HTTPError("401")):
         with pytest.raises(requests.HTTPError):
             client.ensure_fresh_token()
+
+
+def _sleep(sleep_id, score_state, score=None):
+    record = {
+        "id": sleep_id,
+        "cycle_id": 1,
+        "user_id": 10,
+        "created_at": "2026-11-09T07:00:00.000Z",
+        "updated_at": "2026-11-09T07:00:00.000Z",
+        "start": "2026-11-08T23:00:00.000Z",
+        "end": "2026-11-09T07:00:00.000Z",
+        "timezone_offset": "+01:00",
+        "nap": False,
+        "score_state": score_state,
+    }
+    if score is not None:
+        record["score"] = score
+    return record
+
+
+def _recovery(cycle_id, score_state, score=None):
+    record = {
+        "cycle_id": cycle_id,
+        "sleep_id": f"sleep-{cycle_id}",
+        "user_id": 10,
+        "created_at": "2026-11-09T07:00:00.000Z",
+        "updated_at": "2026-11-09T07:00:00.000Z",
+        "score_state": score_state,
+    }
+    if score is not None:
+        record["score"] = score
+    return record
+
+
+def test_get_sleeps_skips_unscored_records():
+    client = _fresh_client()
+    records = [
+        _sleep("a", "SCORED", {"respiratory_rate": 15.2, "sleep_performance_percentage": 90}),
+        _sleep("b", "PENDING_SCORE"),
+    ]
+    with patch("src.whoop.requests.get", return_value=_page(records)):
+        sleeps = client.get_sleeps()
+    assert [s.id for s in sleeps] == ["a"]
+
+
+def test_get_recoveries_skips_unscored_records():
+    client = _fresh_client()
+    score = {"user_calibrating": False, "recovery_score": 66, "resting_heart_rate": 52, "hrv_rmssd_milli": 48.5}
+    records = [_recovery(1, "SCORED", score), _recovery(2, "PENDING_SCORE")]
+    with patch("src.whoop.requests.get", return_value=_page(records)):
+        recoveries = client.get_recoveries()
+    assert [r.cycle_id for r in recoveries] == [1]

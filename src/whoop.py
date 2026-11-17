@@ -115,10 +115,10 @@ class WhoopClient:
         return self._fetch_paginated("cycle", WhoopCycle, start)
 
     def get_sleeps(self, start: Optional[datetime] = None) -> List[WhoopSleep]:
-        return self._fetch_paginated("activity/sleep", WhoopSleep, start)
+        return self._fetch_paginated("activity/sleep", WhoopSleep, start, scored_only=True)
 
     def get_recoveries(self, start: Optional[datetime] = None) -> List[WhoopRecovery]:
-        return self._fetch_paginated("recovery", WhoopRecovery, start)
+        return self._fetch_paginated("recovery", WhoopRecovery, start, scored_only=True)
 
     def get_workouts(self, start: Optional[datetime] = None) -> List[WhoopWorkout]:
         return self._fetch_paginated("activity/workout", WhoopWorkout, start)
@@ -153,6 +153,7 @@ class WhoopClient:
         endpoint: str,
         model_cls: Type[Model],
         start: Optional[datetime] = None,
+        scored_only: bool = False,
     ) -> List[Model]:
         """Generic method to fetch paginated data from the Whoop API."""
         url = f"{API_ENDPOINT}{API_VERSION}/{endpoint}"
@@ -167,6 +168,8 @@ class WhoopClient:
             data = response.json()
 
             records = data.get("records", [])
+            if scored_only:
+                records = [r for r in records if r.get("score_state") == "SCORED"]
             results.extend(model_cls.from_json(r) for r in records)
 
             next_token = data.get("next_token")
