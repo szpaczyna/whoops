@@ -6,7 +6,7 @@ psycopg2==2.9.13
 pymysql==1.2.4
 cryptography==50.0.2
 requests==2.33.0
-SQLAlchemy==2.0.44
+SQLAlchemy==2.1.9
 waitress==3.0.2
 flask-bootstrap==3.3.7.1
 flask-restful==0.3.10
