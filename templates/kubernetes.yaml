@@ -35,6 +35,9 @@ metadata:
   namespace: whoops
 spec:
   replicas: 1
+  # WHOOP rotates refresh tokens, so two pods running at once can invalidate each other's token.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: whoops
