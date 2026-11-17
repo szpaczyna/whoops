@@ -60,7 +60,8 @@ def callback():
     code = request.args.get("code")
     state = request.args.get("state")
 
-    if state != current_app.config["OAuthState"]:
+    expected = current_app.config.pop("OAuthState", None)
+    if expected is None or state != expected:
         flash("Invalid OAuth state", "danger")
         return redirect(url_for("webui.index"))
 

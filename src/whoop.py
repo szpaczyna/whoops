@@ -1,6 +1,5 @@
 import logging
-import random
-import string
+import secrets
 import threading
 import urllib.parse
 from datetime import datetime, timedelta, timezone
@@ -98,7 +97,7 @@ class WhoopClient:
 
     def authorization_url(self):
         """Build the OAuth authorization URL."""
-        state = "".join(random.choices(string.ascii_letters + string.digits, k=16))
+        state = secrets.token_urlsafe(16)
         current_app.config["OAuthState"] = state
 
         params = {
