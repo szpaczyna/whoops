@@ -22,6 +22,8 @@ docker run -d --name whoops --network host \
   docker.io/<user>/whoops:latest
 ```
 
+`--network host` publishes port 5000 on every interface of the host, and Whoops has no login. Block the port with a firewall, or run Whoops behind a reverse proxy that requires authentication.
+
 Then open http://localhost:5000/authorize to grant access.
 
 ## Image details

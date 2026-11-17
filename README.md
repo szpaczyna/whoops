@@ -37,7 +37,7 @@ services:
     image: docker.io/szpaczyn/whoops:latest
     container_name: whoops
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       CLIENT_ID: "<your-whoop-client-id-here"
       CLIENT_SECRET: "<your-whoop-client-secret-here"
@@ -61,6 +61,8 @@ docker run -d \
   docker.io/szpaczyn/whoops:latest
 ```
 
+`--network host` publishes port 5000 on every interface of the host. Block it with a firewall, or use the compose file above.
+
 Update `SQLALCHEMY_DATABASE_URI` depending on your database:
 
 - PostgreSQL: `postgresql+psycopg2://<user>:<password>@<host>:5432/whoop_data`
@@ -80,6 +82,9 @@ of the same chart: a `whoops-env` Secret, Service, Deployment and Gateway API
 > OAuth tokens and the daily import time are persisted in the database, so
 > restarting the application does not require re-authorization or
 > rescheduling. Tokens are refreshed automatically before they expire.
+
+> [!NOTE]
+> Whoops has no login. Anyone who can reach port 5000 can read your data and link the app to a different Whoop account. Keep it on localhost, or put it behind a reverse proxy or Ingress that requires authentication.
 
 1. Navigate to [http://localhost:5000/authorize](http://localhost:5000/authorize) to authorize Whoops to access your Whoop data.
 2. Navigate to [http://localhost:5000](http://localhost:5000) to set when import job runs, disable it, or trigger a manual import.
