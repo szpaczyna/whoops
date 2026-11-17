@@ -8,7 +8,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from src.ext.database import upsert_all
 from src.models import WhoopCycle, WhoopRecovery, WhoopSleep, WhoopWorkout
 from src.models.schedule import load_schedule
-from src.retry import retry
 from src.utils import ImportStatus, ImportTask
 
 logger = logging.getLogger(__name__)
@@ -79,7 +78,6 @@ def _refresh_after_401(app) -> bool:
         return False
 
 
-@retry(requests.HTTPError, tries=6, delay=4, backoff=2)
 def _import_worker(app):
     import_queue = app.config["ImportQueue"]
 
@@ -115,7 +113,6 @@ def _import_worker(app):
             status = ImportStatus.RATE_LIMIT
             if task not in import_queue:
                 import_queue.append(task)
-            raise
         else:
             logger.exception("Unexpected HTTP error")
             status = ImportStatus.UNEXPECTED_ERROR
@@ -125,14 +122,12 @@ def _import_worker(app):
         status = ImportStatus.CONNECTION_ERROR
         if task not in import_queue:
             import_queue.append(task)
-        raise
 
     except requests.Timeout:
         logger.exception("Request timed out, re-queueing task")
         status = ImportStatus.TIMEOUT
         if task not in import_queue:
             import_queue.append(task)
-        raise
 
     except Exception:
         logger.exception("Unexpected error")

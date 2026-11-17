@@ -208,3 +208,21 @@ def test_delete_schedule_removes_row_and_job_idempotently(app, paused_scheduler)
     assert paused_scheduler.get_job(jobs.IMPORT_JOB_ID) is None
     with app.app_context():
         assert load_schedule() is None
+
+
+@pytest.mark.parametrize("error, expected_status", [
+    (requests.ConnectionError("down"), ImportStatus.CONNECTION_ERROR),
+    (requests.ReadTimeout("slow"), ImportStatus.TIMEOUT),
+    (_http_error(429), ImportStatus.RATE_LIMIT),
+])
+def test_worker_retryable_error_requeues_at_end(app, error, expected_status):
+    fetch = MagicMock(side_effect=error)
+    queue = app.config["ImportQueue"]
+    queue.extend([ImportTask(WhoopWorkout, fetch), ImportTask(WhoopWorkout, FakeClient().get_cycles)])
+
+    jobs._import_worker(app)
+
+    assert len(queue) == 2
+    assert queue[-1].callable is fetch
+    assert app.config["LastImportStatus"] == expected_status
+
