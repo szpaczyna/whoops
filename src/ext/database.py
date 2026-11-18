@@ -40,13 +40,14 @@ def upsert_all(models):
     """Insert new rows and update existing ones, matched by primary key.
 
     If the batch violates a constraint, rows are retried one by one and the
-    offending ones are logged and skipped.
+    offending ones are logged and skipped. Returns the number of skipped rows.
     """
+    skipped = 0
     models = list(models)
     try:
         _merge_batch(models)
         db.session.commit()
-        return
+        return 0
     except IntegrityError as exc:
         db.session.rollback()
         logger.warning("Batch upsert failed (%s), retrying row by row", _first_line(exc))
@@ -60,10 +61,13 @@ def upsert_all(models):
             db.session.commit()
         except IntegrityError as exc:
             db.session.rollback()
+            skipped += 1
             logger.warning("Skipped %s %s: %s", type(model).__name__, _pk_of(model), _first_line(exc))
         except Exception:
             db.session.rollback()
             raise
+
+    return skipped
 
 
 def _merge_batch(models):

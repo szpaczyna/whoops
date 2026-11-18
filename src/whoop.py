@@ -3,7 +3,7 @@ import secrets
 import threading
 import urllib.parse
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Dict, List, Optional, Type
+from typing import Callable, Dict, List, Optional, Tuple, Type
 
 import requests
 from flask import current_app, session
@@ -111,16 +111,16 @@ class WhoopClient:
         query = urllib.parse.urlencode(params)
         return f"{API_ENDPOINT}oauth/oauth2/auth?{query}"
 
-    def get_cycles(self, start: Optional[datetime] = None) -> List[WhoopCycle]:
+    def get_cycles(self, start: Optional[datetime] = None) -> Tuple[List[WhoopCycle], int]:
         return self._fetch_paginated("cycle", WhoopCycle, start)
 
-    def get_sleeps(self, start: Optional[datetime] = None) -> List[WhoopSleep]:
+    def get_sleeps(self, start: Optional[datetime] = None) -> Tuple[List[WhoopSleep], int]:
         return self._fetch_paginated("activity/sleep", WhoopSleep, start, scored_only=True)
 
-    def get_recoveries(self, start: Optional[datetime] = None) -> List[WhoopRecovery]:
+    def get_recoveries(self, start: Optional[datetime] = None) -> Tuple[List[WhoopRecovery], int]:
         return self._fetch_paginated("recovery", WhoopRecovery, start, scored_only=True)
 
-    def get_workouts(self, start: Optional[datetime] = None) -> List[WhoopWorkout]:
+    def get_workouts(self, start: Optional[datetime] = None) -> Tuple[List[WhoopWorkout], int]:
         return self._fetch_paginated("activity/workout", WhoopWorkout, start)
 
     def get_profile_basic(self) -> Dict:
@@ -135,13 +135,14 @@ class WhoopClient:
         model_cls: Type[Model],
         start: Optional[datetime] = None,
         scored_only: bool = False,
-    ) -> List[Model]:
+    ) -> Tuple[List[Model], int]:
         """Generic method to fetch paginated data from the Whoop API."""
         url = f"{API_ENDPOINT}{API_VERSION}/{endpoint}"
         params: Dict = {"limit": PAGE_LIMIT}
         if start is not None:
             params["start"] = _as_utc(start).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         results: List[Model] = []
+        skipped = 0
 
         while True:
             response = requests.get(url, headers=self._auth_header(), params=dict(params), timeout=HTTP_TIMEOUT)
@@ -155,11 +156,12 @@ class WhoopClient:
                         continue
                     results.append(model_cls.from_json(r))
                 except (KeyError, TypeError, ValueError, AttributeError) as exc:
+                    skipped += 1
                     logger.warning("Skipping malformed %s record: %s", model_cls.__name__, exc)
 
             next_token = data.get("next_token")
             if not next_token:
-                return results
+                return results, skipped
             params["nextToken"] = next_token
 
     def _get(self, endpoint: str) -> Dict:

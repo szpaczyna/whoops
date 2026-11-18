@@ -215,8 +215,9 @@ def test_get_sleeps_skips_unscored_records():
         _sleep("b", "PENDING_SCORE"),
     ]
     with patch("src.whoop.requests.get", return_value=_page(records)):
-        sleeps = client.get_sleeps()
+        sleeps, skipped = client.get_sleeps()
     assert [s.id for s in sleeps] == ["a"]
+    assert skipped == 0
 
 
 def test_get_recoveries_skips_unscored_records():
@@ -224,8 +225,9 @@ def test_get_recoveries_skips_unscored_records():
     score = {"user_calibrating": False, "recovery_score": 66, "resting_heart_rate": 52, "hrv_rmssd_milli": 48.5}
     records = [_recovery(1, "SCORED", score), _recovery(2, "PENDING_SCORE")]
     with patch("src.whoop.requests.get", return_value=_page(records)):
-        recoveries = client.get_recoveries()
+        recoveries, skipped = client.get_recoveries()
     assert [r.cycle_id for r in recoveries] == [1]
+    assert skipped == 0
 
 
 def test_fetch_paginated_skips_malformed_records(caplog):
@@ -242,8 +244,9 @@ def test_fetch_paginated_skips_malformed_records(caplog):
     records = [{}, valid]
     with patch("src.whoop.requests.get", return_value=_page(records)):
         with caplog.at_level(logging.WARNING, logger="src.whoop"):
-            workouts = client.get_workouts()
+            workouts, skipped = client.get_workouts()
     assert [w.id for w in workouts] == ["w1"]
+    assert skipped == 1
     assert any("Skipping malformed" in r.getMessage() for r in caplog.records)
 
 
@@ -253,6 +256,7 @@ def test_fetch_paginated_skips_malformed_scored_records(caplog):
     records = [None, valid]
     with patch("src.whoop.requests.get", return_value=_page(records)):
         with caplog.at_level(logging.WARNING, logger="src.whoop"):
-            sleeps = client.get_sleeps()
+            sleeps, skipped = client.get_sleeps()
     assert [s.id for s in sleeps] == ["a"]
+    assert skipped == 1
     assert any("Skipping malformed" in r.getMessage() for r in caplog.records)

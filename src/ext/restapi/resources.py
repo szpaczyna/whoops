@@ -18,10 +18,10 @@ class WhoopDataResource(Resource):
         whoop_client = current_app.config["WhoopClient"]
 
         try:
-            cycles = [c.to_dict() for c in whoop_client.get_cycles()]
-            sleeps = [s.to_dict() for s in whoop_client.get_sleeps()]
-            recoveries = [r.to_dict() for r in whoop_client.get_recoveries()]
-            workouts = [w.to_dict() for w in whoop_client.get_workouts()]
+            cycles = [c.to_dict() for c in whoop_client.get_cycles()[0]]
+            sleeps = [s.to_dict() for s in whoop_client.get_sleeps()[0]]
+            recoveries = [r.to_dict() for r in whoop_client.get_recoveries()[0]]
+            workouts = [w.to_dict() for w in whoop_client.get_workouts()[0]]
 
             data = {
                 "cycles": cycles,

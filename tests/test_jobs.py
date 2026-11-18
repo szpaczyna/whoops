@@ -21,16 +21,16 @@ class FakeClient:
         self.refresh_token = MagicMock()
 
     def get_workouts(self, start=None):
-        return []
+        return ([], 0)
 
     def get_cycles(self, start=None):
-        return []
+        return ([], 0)
 
     def get_sleeps(self, start=None):
-        return []
+        return ([], 0)
 
     def get_recoveries(self, start=None):
-        return []
+        return ([], 0)
 
 
 def _http_error(status_code):
@@ -109,7 +109,7 @@ def test_incremental_backlog_uses_configured_window(app):
 
 def test_worker_passes_start_and_upserts(app):
     start = datetime(2026, 11, 9, tzinfo=timezone.utc)
-    fetch = MagicMock(return_value=[_workout("w1")])
+    fetch = MagicMock(return_value=([_workout("w1")], 0))
     app.config["ImportQueue"].append(ImportTask(WhoopWorkout, fetch, start))
 
     jobs._import_worker(app)
@@ -222,6 +222,8 @@ def test_delete_schedule_removes_row_and_job_idempotently(app, paused_scheduler)
     (requests.ConnectionError("down"), ImportStatus.CONNECTION_ERROR),
     (requests.ReadTimeout("slow"), ImportStatus.TIMEOUT),
     (_http_error(429), ImportStatus.RATE_LIMIT),
+    (_http_error(500), ImportStatus.SERVER_ERROR),
+    (_http_error(503), ImportStatus.SERVER_ERROR),
 ])
 def test_worker_retryable_error_requeues_at_end(app, error, expected_status):
     fetch = MagicMock(side_effect=error)
@@ -234,3 +236,21 @@ def test_worker_retryable_error_requeues_at_end(app, error, expected_status):
     assert queue[-1].callable is fetch
     assert app.config["LastImportStatus"] == expected_status
 
+
+def test_worker_skipped_when_fetch_reports_skipped(app):
+    fetch = MagicMock(return_value=([], 1))
+    app.config["ImportQueue"].append(ImportTask(WhoopWorkout, fetch))
+
+    jobs._import_worker(app)
+
+    assert app.config["LastImportStatus"] == ImportStatus.SKIPPED
+
+
+def test_worker_skipped_when_upsert_reports_skipped(app, monkeypatch):
+    fetch = MagicMock(return_value=([_workout("w1")], 0))
+    monkeypatch.setattr(jobs, "upsert_all", MagicMock(return_value=1))
+    app.config["ImportQueue"].append(ImportTask(WhoopWorkout, fetch))
+
+    jobs._import_worker(app)
+
+    assert app.config["LastImportStatus"] == ImportStatus.SKIPPED
