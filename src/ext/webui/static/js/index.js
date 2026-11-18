@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fetchImportStatus({ prefill: true });
   startPolling();
+  window.addEventListener("beforeunload", () => clearInterval(statusInterval));
 });
 
 
