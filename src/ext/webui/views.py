@@ -10,6 +10,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
 
@@ -55,7 +56,7 @@ def callback():
     code = request.args.get("code")
     state = request.args.get("state")
 
-    expected = current_app.config.pop("OAuthState", None)
+    expected = session.pop("oauth_state", None)
     if expected is None or state != expected:
         flash("Invalid OAuth state", "danger")
         return redirect(url_for("webui.index"))
