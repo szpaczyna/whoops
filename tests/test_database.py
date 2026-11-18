@@ -41,7 +41,7 @@ def _select_counter():
 
 def test_upsert_all_commits_all_rows(app):
     with app.app_context():
-        upsert_all([Item(name="a"), Item(name="b")])
+        assert upsert_all([Item(name="a"), Item(name="b")]) == 0
         assert db.session.query(Item).count() == 2
 
 
@@ -104,14 +104,14 @@ def test_upsert_all_rolls_back_and_raises(app, monkeypatch):
 def test_upsert_all_skips_rows_that_violate_constraints(app, caplog):
     with app.app_context():
         upsert_all([Item(name="a")])
-        upsert_all([Item(name="b"), Item(name="a"), Item(name="c")])
+        assert upsert_all([Item(name="b"), Item(name="a"), Item(name="c")]) == 1
         assert sorted(i.name for i in db.session.query(Item).all()) == ["a", "b", "c"]
     assert "Skipped Item" in caplog.text
 
 
 def test_upsert_all_null_in_not_null_column_keeps_other_rows(app, caplog):
     with app.app_context():
-        upsert_all([Record(id="1"), Item(name=None), Record(id="2")])
+        assert upsert_all([Record(id="1"), Item(name=None), Record(id="2")]) == 1
         assert db.session.query(Record).count() == 2
         assert db.session.query(Item).count() == 0
     assert "Skipped Item" in caplog.text

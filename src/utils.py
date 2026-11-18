@@ -23,6 +23,8 @@ class ImportStatus(Enum):
     CONNECTION_ERROR = "Connection error. Re-queued."
     TIMEOUT = "Request timed out. Re-queued."
     UNEXPECTED_ERROR = "Unexpected error. Check logs."
+    SKIPPED = "Completed with skipped records. Check logs."
+    SERVER_ERROR = "Server error. Re-queued."
 
 
 def parseRange(range: str) -> int:

@@ -90,12 +90,25 @@ def _import_worker(app):
     status = ImportStatus.STARTED
 
     try:
-        result = task.callable(start=task.start)
+        result, fetch_skipped = task.callable(start=task.start)
         with app.app_context():
-            upsert_all(result)
+            db_skipped = upsert_all(result)
 
-        logger.info(f"{task.model.__name__} imported successfully ({len(result)})")
-        status = ImportStatus.SUCCESS
+        if fetch_skipped + db_skipped > 0:
+            fetched = len(result) + fetch_skipped
+            written = len(result) - db_skipped
+            skipped = fetch_skipped + db_skipped
+            status = ImportStatus.SKIPPED
+            logger.warning(
+                "%s import completed with skipped records (fetched=%d, written=%d, skipped=%d)",
+                task.model.__name__,
+                fetched,
+                written,
+                skipped,
+            )
+        else:
+            logger.info(f"{task.model.__name__} imported successfully ({len(result)})")
+            status = ImportStatus.SUCCESS
 
     except requests.HTTPError as e:
         status_code = getattr(e.response, "status_code", None)
@@ -111,6 +124,11 @@ def _import_worker(app):
         elif status_code == 429:
             logger.exception("Rate limit hit, re-queueing task")
             status = ImportStatus.RATE_LIMIT
+            if task not in import_queue:
+                import_queue.append(task)
+        elif status_code is not None and 500 <= status_code < 600:
+            logger.exception("Server error, re-queueing task")
+            status = ImportStatus.SERVER_ERROR
             if task not in import_queue:
                 import_queue.append(task)
         else:
