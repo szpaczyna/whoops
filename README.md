@@ -25,7 +25,7 @@ Whoops is a simple Flask application that imports your Whoop data into a Postgre
 
 # Getting Started
 
-Example Docker compose file and kubernetes manifests are provided in the [templates](https://github.com/kryoseu/whoops/tree/main/templates) section, which also include how to install a database along with Whoops, in case you don't have one yet.
+Example Docker compose file and kubernetes manifests are provided in the [templates](https://github.com/szpaczyna/whoops/tree/main/templates) section, which also include how to install a database along with Whoops, in case you don't have one yet.
 
 ## With Docker
 
@@ -39,8 +39,8 @@ services:
     ports:
       - "127.0.0.1:5000:5000"
     environment:
-      CLIENT_ID: "<your-whoop-client-id-here"
-      CLIENT_SECRET: "<your-whoop-client-secret-here"
+      CLIENT_ID: "<your-whoop-client-id-here>"
+      CLIENT_SECRET: "<your-whoop-client-secret-here>"
       REDIRECT_URI: "http://localhost:5000/callback"
       SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data"
       SECRET_KEY: "<a-long-random-string>"
@@ -110,13 +110,3 @@ If you have [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/inst
 
 
 Thank you for your support! 💛
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=kryoseu%2Fwhoops&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=kryoseu/whoops&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=kryoseu/whoops&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=kryoseu/whoops&type=date&legend=top-left" />
- </picture>
-</a>

@@ -1,14 +1,15 @@
 services:
   whoops:
-    image: docker.io/kryoseu/whoops:latest
+    image: docker.io/szpaczyn/whoops:latest
     container_name: whoops
     ports:
       - "127.0.0.1:5000:5000"
     environment:
-      CLIENT_ID: "<your-whoop-client-id-here"
-      CLIENT_SECRET: "<your-whoop-client-secret-here"
+      CLIENT_ID: "<your-whoop-client-id-here>"
+      CLIENT_SECRET: "<your-whoop-client-secret-here>"
       REDIRECT_URI: "http://localhost:5000/callback"
       SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://whoops:whoops@postgres:5432/whoop_data"
+      SECRET_KEY: "<a-long-random-string>"
       # Alternative for MySQL
       # SQLALCHEMY_DATABASE_URI: "mysql+pymysql://whoops:whoops@mysql:3306/whoop_data"
       # Or for external DB
