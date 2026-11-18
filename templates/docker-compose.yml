@@ -24,13 +24,13 @@ services:
       POSTGRES_PASSWORD: "whoops"
       POSTGRES_DB: "whoop_data"
     volumes:
-      - whoops_pgdata:/var/lib/postgresql/data
+      - whoops_pgdata:/var/lib/postgresql
     ports:
       - "127.0.0.1:5432:5432"
     restart: unless-stopped
 
   # mysql:
-  #   image: mysql:8.0
+  #   image: mysql:8.4
   #   container_name: whoops-mysql
   #   environment:
   #     MYSQL_ROOT_PASSWORD: "rootpass"
