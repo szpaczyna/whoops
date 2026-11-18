@@ -110,6 +110,9 @@ def schedule():
     if not data:
         abort(400, description="Missing input")
 
+    if not isinstance(data, dict):
+        abort(400, description="Invalid input")
+
     hour = data.get("hour")
     minute = data.get("minute")
 
@@ -122,7 +125,7 @@ def schedule():
 
         if not (0 <= hour <= 23 and 0 <= minute <= 59):
             raise ValueError
-    except ValueError:
+    except (TypeError, ValueError):
         abort(400, description="Invalid input")
 
     save_schedule(hour, minute)
