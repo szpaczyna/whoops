@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Callable, Dict, List, Optional, Type
 
 import requests
-from flask import current_app
+from flask import current_app, session
 
 from src.models import Model
 from src.models.cycle import WhoopCycle
@@ -99,7 +99,7 @@ class WhoopClient:
     def authorization_url(self):
         """Build the OAuth authorization URL."""
         state = secrets.token_urlsafe(16)
-        current_app.config["OAuthState"] = state
+        session["oauth_state"] = state
 
         params = {
             "response_type": "code",
@@ -149,9 +149,13 @@ class WhoopClient:
             data = response.json()
 
             records = data.get("records", [])
-            if scored_only:
-                records = [r for r in records if r.get("score_state") == "SCORED"]
-            results.extend(model_cls.from_json(r) for r in records)
+            for r in records:
+                try:
+                    if scored_only and r.get("score_state") != "SCORED":
+                        continue
+                    results.append(model_cls.from_json(r))
+                except (KeyError, TypeError, ValueError, AttributeError) as exc:
+                    logger.warning("Skipping malformed %s record: %s", model_cls.__name__, exc)
 
             next_token = data.get("next_token")
             if not next_token:

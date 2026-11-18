@@ -31,9 +31,7 @@ class WhoopRecovery(db.Model):
             cycle_id=data["cycle_id"],  # type: ignore
             user_id=data["user_id"],  # type: ignore
             timestamp=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),  # type: ignore
-            updated_at=datetime.fromisoformat(  # type: ignore
-                data["updated_at"].replace("Z", "+00:00")
-            ),
+            updated_at=datetime.fromisoformat((data.get("updated_at") or data["created_at"]).replace("Z", "+00:00")),  # type: ignore
             score_state=data["score_state"],  # type: ignore
             user_calibrating=score["user_calibrating"],  # type: ignore
             recovery_score=score["recovery_score"],  # type: ignore

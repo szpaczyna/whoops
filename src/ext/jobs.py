@@ -48,7 +48,7 @@ def fill_backlog(app, start=None):
 
     # request immediate import
     job = app.config["Scheduler"].get_job("import_worker")
-    job.modify(next_run_time=datetime.datetime.now())
+    job.modify(next_run_time=datetime.datetime.now(datetime.timezone.utc))
 
 
 def incremental_backlog(app):

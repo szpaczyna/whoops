@@ -91,6 +91,14 @@ def test_fill_backlog_deduplicates(app):
     assert len(app.config["ImportQueue"]) == 4
 
 
+def test_fill_backlog_schedules_immediate_import_in_utc(app):
+    app.config["Scheduler"] = MagicMock()
+    jobs.fill_backlog(app)
+    next_run_time = app.config["Scheduler"].get_job.return_value.modify.call_args.kwargs["next_run_time"]
+    assert next_run_time.tzinfo is not None
+    assert next_run_time.utcoffset() == timezone.utc.utcoffset(next_run_time)
+
+
 def test_incremental_backlog_uses_configured_window(app):
     app.config["Scheduler"] = MagicMock()
     jobs.incremental_backlog(app)

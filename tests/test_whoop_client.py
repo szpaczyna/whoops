@@ -1,16 +1,17 @@
+import logging
 from unittest.mock import patch, MagicMock
 
 from src.whoop import HTTP_TIMEOUT, WhoopClient
 
 
 def test_authorization_url_scopes():
+    from flask import Flask
+
+    app = Flask(__name__)
+    app.config["SECRET_KEY"] = "test"
+    app.config["REDIRECT_URI"] = "http://localhost/cb"
     client = WhoopClient("id", "secret")
-    # avoid Flask current_app dependency by monkeypatching config access
-    import src.whoop as w
-    # Provide a fake current_app
-    fake_app = MagicMock()
-    fake_app.config = {"REDIRECT_URI": "http://localhost/cb", "OAuthState": None}
-    with patch.object(w, "current_app", fake_app):
+    with app.test_request_context():
         url = client.authorization_url()
     assert "read%3Aprofile" in url
     assert "read%3Abody_measurement" in url
@@ -225,3 +226,33 @@ def test_get_recoveries_skips_unscored_records():
     with patch("src.whoop.requests.get", return_value=_page(records)):
         recoveries = client.get_recoveries()
     assert [r.cycle_id for r in recoveries] == [1]
+
+
+def test_fetch_paginated_skips_malformed_records(caplog):
+    client = _fresh_client()
+    valid = {
+        "id": "w1",
+        "created_at": "2026-11-15T10:00:00Z",
+        "updated_at": "2026-11-15T10:00:00Z",
+        "start": "2026-11-15T09:00:00Z",
+        "end": "2026-11-15T09:30:00Z",
+        "sport_name": "walking",
+        "score_state": "SCORED",
+    }
+    records = [{}, valid]
+    with patch("src.whoop.requests.get", return_value=_page(records)):
+        with caplog.at_level(logging.WARNING, logger="src.whoop"):
+            workouts = client.get_workouts()
+    assert [w.id for w in workouts] == ["w1"]
+    assert any("Skipping malformed" in r.getMessage() for r in caplog.records)
+
+
+def test_fetch_paginated_skips_malformed_scored_records(caplog):
+    client = _fresh_client()
+    valid = _sleep("a", "SCORED", {"respiratory_rate": 15.2, "sleep_performance_percentage": 90})
+    records = [None, valid]
+    with patch("src.whoop.requests.get", return_value=_page(records)):
+        with caplog.at_level(logging.WARNING, logger="src.whoop"):
+            sleeps = client.get_sleeps()
+    assert [s.id for s in sleeps] == ["a"]
+    assert any("Skipping malformed" in r.getMessage() for r in caplog.records)

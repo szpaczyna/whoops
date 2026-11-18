@@ -13,7 +13,7 @@ class WhoopWorkout(db.Model):
     start = db.Column(db.DateTime(timezone=True), nullable=False)
     end = db.Column(db.DateTime(timezone=True), nullable=False)
     timezone_offset = db.Column(db.String(10), nullable=True)
-    sport_name = db.Column(db.String(32), nullable=False)
+    sport_name = db.Column(db.String(32), nullable=True)
     score_state = db.Column(db.String(15), nullable=True)
 
     # Score fields
