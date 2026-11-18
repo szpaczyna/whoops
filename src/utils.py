@@ -37,10 +37,15 @@ def parseRange(range: str) -> int:
         raise ValueError("Invalid range value")
 
     if unit == "d":
-        return value
+        days = value
     elif unit == "m":
-        return value * 30
+        days = value * 30
     elif unit == "y":
-        return value * 365
+        days = value * 365
     else:
         raise ValueError("Invalid range unit")
+
+    if days < 0 or days > 3650:
+        raise ValueError("Invalid range value")
+
+    return days
