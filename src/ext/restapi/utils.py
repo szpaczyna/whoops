@@ -20,7 +20,7 @@ def records_from_request(model):
         return {"message": str(e)}, 400
 
     now = datetime.now(tz=timezone.utc)
-    start = now - timedelta(days=range + 1)
+    start = now - timedelta(days=range)
 
     records = query_all_between(model, start, now)
 

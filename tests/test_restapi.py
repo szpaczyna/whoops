@@ -1,6 +1,8 @@
-from unittest.mock import patch
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 from flask import Flask
 
 from src.ext import restapi
@@ -15,9 +17,14 @@ ROUTES = [
 
 
 @pytest.fixture(scope="module")
-def client():
+def app():
     app = Flask(__name__)
     restapi.init_app(app)
+    return app
+
+
+@pytest.fixture(scope="module")
+def client(app):
     return app.test_client()
 
 
@@ -48,3 +55,29 @@ def test_invalid_range(client):
     resp = client.get("/api/v1/whoop/cycle", query_string={"range": "xd"})
 
     assert resp.status_code == 400
+
+
+def test_profile_json_error(app):
+    mock_client = MagicMock()
+    mock_client.get_profile_basic.side_effect = requests.HTTPError(
+        "401 Unauthorized", response=MagicMock(status_code=401)
+    )
+    app.config["WhoopClient"] = mock_client
+    client = app.test_client()
+
+    resp = client.get("/api/v1/whoop/user/profile")
+
+    assert resp.status_code == 401
+    assert resp.mimetype == "application/json"
+    assert isinstance(resp.get_json()["message"], str)
+
+
+def test_range_seven_days(client):
+    with patch(
+        "src.ext.restapi.utils.query_all_between", return_value=[]
+    ) as query_all_between:
+        client.get("/api/v1/whoop/cycle", query_string={"range": "7d"})
+
+    start = query_all_between.call_args.args[1]
+    delta = datetime.now(timezone.utc) - start
+    assert abs(delta.total_seconds() - 7 * 86400) <= 2

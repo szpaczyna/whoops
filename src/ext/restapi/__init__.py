@@ -7,7 +7,6 @@ from .resources import (
     ModelDataResource,
     UserBodyMeasurementResource,
     UserProfileResource,
-    WhoopDataResource,
 )
 
 bp = Blueprint("restapi", __name__, url_prefix="/api/v1")
@@ -15,7 +14,6 @@ api = Api(bp)
 
 
 def init_app(app):
-    api.add_resource(WhoopDataResource, "/whoop/data")
     for path, endpoint, model in (
         ("/whoop/cycle", "cycle", WhoopCycle),
         ("/whoop/recovery", "recovery", WhoopRecovery),
