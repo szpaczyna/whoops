@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-26.04
@@ -48,3 +51,53 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -q
+
+  test-migrations:
+    runs-on: ubuntu-26.04
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: whoops
+          POSTGRES_PASSWORD: whoops
+          POSTGRES_DB: whoop_data
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U whoops -d whoop_data"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: whoop_data
+          MYSQL_USER: whoops
+          MYSQL_PASSWORD: whoops
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -prootpass"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.15'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run migration tests
+        env:
+          TEST_POSTGRES_URI: postgresql+psycopg2://whoops:whoops@127.0.0.1:5432/whoop_data
+          TEST_MYSQL_URI: mysql+pymysql://whoops:whoops@127.0.0.1:3306/whoop_data
+        run: python -m pytest tests/test_migrations.py -q
