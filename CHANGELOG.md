@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.3](https://github.com/szpaczyna/whoops/compare/v1.3.2...v1.3.3) (2026-11-18)
+
+
+### Bug Fixes
+
+* apply import, auth and range audit fixes ([#38](https://github.com/szpaczyna/whoops/issues/38)) ([3abae03](https://github.com/szpaczyna/whoops/commit/3abae03cd0a6c25af5b86928ff386bf18624dcac))
+* give the workout dashboard its own uid ([#34](https://github.com/szpaczyna/whoops/issues/34)) ([f1dcacf](https://github.com/szpaczyna/whoops/commit/f1dcacfabc64b55debbf48446e67e714e7bf7870))
+
+
+### Miscellaneous
+
+* **deps:** update dependency requests to v2.34.2 ([#30](https://github.com/szpaczyna/whoops/issues/30)) ([78bdf87](https://github.com/szpaczyna/whoops/commit/78bdf87c276d2bd3e6c7776d32c5fe73ede36851))
+* **deps:** update dependency sqlalchemy to v2.1.9 ([#36](https://github.com/szpaczyna/whoops/issues/36)) ([957ae25](https://github.com/szpaczyna/whoops/commit/957ae25fb09cab49c713da32976b2128cba8a9cd))
+* **deps:** update hadolint/hadolint-action action to v3.5.0 ([#37](https://github.com/szpaczyna/whoops/issues/37)) ([94f37c8](https://github.com/szpaczyna/whoops/commit/94f37c8d741fad255e7aa7baaf4be3b9db0efcf3))
+
 ## [1.3.2](https://github.com/szpaczyna/whoops/compare/v1.3.1...v1.3.2) (2026-11-17)
 
 
