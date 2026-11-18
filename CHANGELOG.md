@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.3.4](https://github.com/szpaczyna/whoops/compare/v1.3.3...v1.3.4) (2026-11-18)
+
+
+### Bug Fixes
+
+* **api:** return JSON errors and use a rolling range window ([#41](https://github.com/szpaczyna/whoops/issues/41)) ([472566b](https://github.com/szpaczyna/whoops/commit/472566b803f52254530902a6c7866f8a13b14bce))
+* **ci:** append Docker image link to release notes ([#39](https://github.com/szpaczyna/whoops/issues/39)) ([c89fade](https://github.com/szpaczyna/whoops/commit/c89fade29774ebcf190204dda4022e7bcf355701))
+* **deploy:** point templates at the published image ([#42](https://github.com/szpaczyna/whoops/issues/42)) ([379ff75](https://github.com/szpaczyna/whoops/commit/379ff752b9e209ca35645b61976c16f685e8f147))
+* **import:** report skipped records and requeue server errors ([#44](https://github.com/szpaczyna/whoops/issues/44)) ([3c79e03](https://github.com/szpaczyna/whoops/commit/3c79e03b77d9826e2f20fc807de8a2516035874c))
+* mount the postgres 18 data directory and keep secrets out of images ([#48](https://github.com/szpaczyna/whoops/issues/48)) ([2b95d4b](https://github.com/szpaczyna/whoops/commit/2b95d4bc7ad1d4c0ef175df984f2804acc0f682d))
+* return 400 from /schedule for malformed JSON input ([#49](https://github.com/szpaczyna/whoops/issues/49)) ([87a6f26](https://github.com/szpaczyna/whoops/commit/87a6f260e260fd052785eb7c8e4f517a10844a17))
+
+
+### Miscellaneous
+
+* **deps:** update mysql docker tag to v8.4 ([#45](https://github.com/szpaczyna/whoops/issues/45)) ([02cf577](https://github.com/szpaczyna/whoops/commit/02cf577530606e43bea6365da23ae91975a39543))
+
+
+### CI/CD
+
+* give each workflow only the token scope it uses ([#47](https://github.com/szpaczyna/whoops/issues/47)) ([095ee32](https://github.com/szpaczyna/whoops/commit/095ee3282008b6755cef2d4c13cadaa133511417))
+* test schema migrations against PostgreSQL and MySQL ([#43](https://github.com/szpaczyna/whoops/issues/43)) ([bbfb285](https://github.com/szpaczyna/whoops/commit/bbfb2854153097d76c7d9ae4559c7a7bd349146e))
+
 ## [1.3.3](https://github.com/szpaczyna/whoops/compare/v1.3.2...v1.3.3) (2026-11-18)
 
 
