@@ -19,41 +19,39 @@ class WhoopSleep(db.Model):
     score_state = db.Column(db.String(15), nullable=True)
 
     # Score fields
-    respiratory_rate = db.Column(db.Float, nullable=False)
-    performance_perc = db.Column(db.Integer, nullable=False)
-    consistency_perc = db.Column(db.Integer, nullable=False)
-    efficiency_perc = db.Column(db.Integer, nullable=False)
+    respiratory_rate = db.Column(db.Float, nullable=True)
+    performance_perc = db.Column(db.Integer, nullable=True)
+    consistency_perc = db.Column(db.Integer, nullable=True)
+    efficiency_perc = db.Column(db.Integer, nullable=True)
 
     # Stage summary
-    total_in_bed_ms = db.Column(db.BigInteger, nullable=False)
-    total_awake_ms = db.Column(db.BigInteger, nullable=False)
+    total_in_bed_ms = db.Column(db.BigInteger, nullable=True)
+    total_awake_ms = db.Column(db.BigInteger, nullable=True)
     total_no_data_ms = db.Column(db.BigInteger, nullable=True)
-    total_light_sleep_ms = db.Column(db.BigInteger, nullable=False)
-    total_slow_wave_sleep_ms = db.Column(db.BigInteger, nullable=False)
-    total_rem_sleep_ms = db.Column(db.BigInteger, nullable=False)
-    sleep_cycle_count = db.Column(db.Integer, nullable=False)
-    disturbance_count = db.Column(db.Integer, nullable=False)
+    total_light_sleep_ms = db.Column(db.BigInteger, nullable=True)
+    total_slow_wave_sleep_ms = db.Column(db.BigInteger, nullable=True)
+    total_rem_sleep_ms = db.Column(db.BigInteger, nullable=True)
+    sleep_cycle_count = db.Column(db.Integer, nullable=True)
+    disturbance_count = db.Column(db.Integer, nullable=True)
 
     # Sleep needed
-    sleep_needed_baseline_ms = db.Column(db.BigInteger, nullable=False)
-    sleep_debt_ms = db.Column(db.BigInteger, nullable=False)
-    add_sleep_from_strain_ms = db.Column(db.BigInteger, nullable=False)
+    sleep_needed_baseline_ms = db.Column(db.BigInteger, nullable=True)
+    sleep_debt_ms = db.Column(db.BigInteger, nullable=True)
+    add_sleep_from_strain_ms = db.Column(db.BigInteger, nullable=True)
     add_sleep_from_nap_ms = db.Column(db.BigInteger, nullable=True)
 
     @classmethod
     def from_json(cls, data: dict) -> "WhoopSleep":
-        score = data.get("score", {})
-        stage = score.get("stage_summary", {})
-        sleep_needed = score.get("sleep_needed", {})
+        score = data.get("score") or {}
+        stage = score.get("stage_summary") or {}
+        sleep_needed = score.get("sleep_needed") or {}
 
         return cls(
             id=data["id"],  # type: ignore
             user_id=data.get("user_id"),  # type: ignore
             cycle_id=data["cycle_id"],  # type: ignore
             timestamp=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),  # type: ignore
-            updated_at=datetime.fromisoformat(  # type: ignore
-                data["updated_at"].replace("Z", "+00:00")
-            ),
+            updated_at=datetime.fromisoformat(data["updated_at"].replace("Z", "+00:00")) if data.get("updated_at") else None,  # type: ignore
             start=datetime.fromisoformat(data["start"].replace("Z", "+00:00")),  # type: ignore
             end=datetime.fromisoformat(data["end"].replace("Z", "+00:00")),  # type: ignore
             timezone_offset=data.get("timezone_offset"),  # type: ignore

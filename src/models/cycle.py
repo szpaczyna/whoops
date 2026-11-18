@@ -31,9 +31,7 @@ class WhoopCycle(db.Model):
             id=data["id"],  # type: ignore
             user_id=data.get("user_id"),  # type: ignore
             timestamp=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),  # type: ignore
-            updated_at=datetime.fromisoformat(  # type: ignore
-                data["updated_at"].replace("Z", "+00:00")
-            ),
+            updated_at=datetime.fromisoformat((data.get("updated_at") or data["created_at"]).replace("Z", "+00:00")),  # type: ignore
             start=datetime.fromisoformat(data["start"].replace("Z", "+00:00")),  # type: ignore
             end=datetime.fromisoformat(data["end"].replace("Z", "+00:00"))  # type: ignore
             if data.get("end")
