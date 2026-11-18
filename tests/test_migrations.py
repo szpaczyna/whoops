@@ -135,48 +135,12 @@ def _column_map(inspector, table_name):
     return {c["name"]: c for c in inspector.get_columns(table_name)}
 
 
-@pytest.mark.skipif(not os.getenv("TEST_POSTGRES_URI"), reason="TEST_POSTGRES_URI not set")
-def test_migrate_schema_postgresql():
-    uri = os.environ["TEST_POSTGRES_URI"]
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = uri
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    db.init_app(app)
+@pytest.mark.parametrize("env_var", ["TEST_POSTGRES_URI", "TEST_MYSQL_URI"])
+def test_migrate_schema(env_var):
+    uri = os.getenv(env_var)
+    if not uri:
+        pytest.skip(f"{env_var} not set")
 
-    metadata = _build_old_metadata()
-    with app.app_context():
-        try:
-            metadata.drop_all(bind=db.engine, checkfirst=True)
-            metadata.create_all(bind=db.engine)
-            _migrate_schema()
-
-            from sqlalchemy import inspect as sa_inspect
-
-            inspector = sa_inspect(db.engine)
-
-            cycle_cols = _column_map(inspector, "whoop_cycle")
-            assert "user_id" in cycle_cols
-            assert "step_count" in cycle_cols
-            assert cycle_cols["end"]["nullable"] is True
-
-            sleep_cols = _column_map(inspector, "whoop_sleep")
-            assert "user_id" in sleep_cols
-            for name in SLEEP_NOT_NULL_COLUMNS:
-                assert sleep_cols[name]["nullable"] is True, name
-
-            recovery_cols = _column_map(inspector, "whoop_recovery")
-            assert recovery_cols["spo2_perc"]["nullable"] is True
-            assert recovery_cols["skin_temp_celsius"]["nullable"] is True
-
-            workout_cols = _column_map(inspector, "whoop_workout")
-            assert workout_cols["sport_name"]["nullable"] is True
-        finally:
-            metadata.drop_all(bind=db.engine, checkfirst=True)
-
-
-@pytest.mark.skipif(not os.getenv("TEST_MYSQL_URI"), reason="TEST_MYSQL_URI not set")
-def test_migrate_schema_mysql():
-    uri = os.environ["TEST_MYSQL_URI"]
     app = Flask(__name__)
     app.config["SQLALCHEMY_DATABASE_URI"] = uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

@@ -9,11 +9,10 @@ from .resources import (
     UserProfileResource,
 )
 
-bp = Blueprint("restapi", __name__, url_prefix="/api/v1")
-api = Api(bp)
-
 
 def init_app(app):
+    bp = Blueprint("restapi", __name__, url_prefix="/api/v1")
+    api = Api(bp)
     for path, endpoint, model in (
         ("/whoop/cycle", "cycle", WhoopCycle),
         ("/whoop/recovery", "recovery", WhoopRecovery),
