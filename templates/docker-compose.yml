@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:18
+    image: postgres:19
     container_name: whoops-postgres
     environment:
       POSTGRES_USER: "whoops"
