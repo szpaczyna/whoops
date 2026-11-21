@@ -69,9 +69,8 @@ jobs:
         run: |
           TAG="${{ needs.create-release-pr.outputs.tag_name }}"
           IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/whoops:${{ steps.ver.outputs.VERSION }}"
-          LATEST="${{ secrets.DOCKERHUB_USERNAME }}/whoops:latest"
           if ! BODY="$(gh release view "$TAG" --json body --jq '.body')"; then
             echo "::warning::Failed to read release notes for ${TAG}"
-          elif ! printf '%s\n\n### Docker image\n\n`docker pull %s`\n`docker pull %s`\n' "$BODY" "$IMAGE" "$LATEST" | gh release edit "$TAG" --notes-file -; then
+          elif ! printf '%s\n\n### Docker image\n\n`docker pull %s`\n' "$BODY" "$IMAGE" | gh release edit "$TAG" --notes-file -; then
             echo "::warning::Failed to append the Docker image link to release ${TAG}"
           fi
