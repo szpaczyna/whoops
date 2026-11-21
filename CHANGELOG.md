@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.5](https://github.com/szpaczyna/whoops/compare/v1.3.4...v1.3.5) (2026-11-21)
+
+
+### Bug Fixes
+
+* **ci:** show only versioned image in release notes ([#52](https://github.com/szpaczyna/whoops/issues/52)) ([75cc5ac](https://github.com/szpaczyna/whoops/commit/75cc5ace2fae552f7ffa8d54f82925debf6da5be))
+
+
+### Miscellaneous
+
+* **ci:** publish release images to ghcr.io ([#53](https://github.com/szpaczyna/whoops/issues/53)) ([4477d12](https://github.com/szpaczyna/whoops/commit/4477d121918035a9d6aa492903a76da1c087464e))
+
 ## [1.3.4](https://github.com/szpaczyna/whoops/compare/v1.3.3...v1.3.4) (2026-11-18)
 
 
