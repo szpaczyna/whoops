@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.6](https://github.com/szpaczyna/whoops/compare/v1.3.5...v1.3.6) (2026-11-21)
+
+
+### Miscellaneous
+
+* **ci:** list ghcr image in release notes ([#55](https://github.com/szpaczyna/whoops/issues/55)) ([4ecba70](https://github.com/szpaczyna/whoops/commit/4ecba702111dea183e0638f559af1f43a9abcfc8))
+
 ## [1.3.5](https://github.com/szpaczyna/whoops/compare/v1.3.4...v1.3.5) (2026-11-21)
 
 
